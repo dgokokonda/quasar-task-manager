@@ -1,3 +1,41 @@
 {
-  "extends": "./.quasar/tsconfig.json"
+  "extends": "./.quasar/tsconfig.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "allowJs": true,
+    "noEmit": true,
+    "strict": true,
+    "jsx": "preserve",
+    "sourceMap": false,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+    "types": ["vite/client", "@quasar/app-vite", "node"],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@stores/*": ["./src/stores/*"],
+      "@types/*": ["./src/types/*"],
+      "@composables/*": ["./src/composables/*"],
+      "@services/*": ["./src/services/*"],
+      "@utils/*": ["./src/utils/*"],
+
+      "#q-app/*": ["./.quasar/types/*"]
+    }
+    // "baseUrl": "."
+    // "ignoreDeprecations": "6.0"
+  },
+  "include": [
+    "src/**/*",
+    "src/**/*.vue",
+    "src/**/*.d.ts",
+    ".quasar/types/**/*.d.ts",
+    "quasar.config.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
 }

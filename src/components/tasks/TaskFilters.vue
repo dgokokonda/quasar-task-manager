@@ -1,5 +1,4 @@
 <template>
-  <router-view />
+  <span>Фильтры в разработке</span>
 </template>
-
 <script setup lang="ts"></script>

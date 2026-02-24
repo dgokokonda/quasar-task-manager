@@ -1,4 +1,4 @@
-# Quasar App (quasar-tasks-interface)
+# Quasar Task Manager (quasar-task-manager)
 
 A Quasar Project
 

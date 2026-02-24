@@ -2,16 +2,131 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
 import { defineConfig } from '#q-app/wrappers';
+import * as path from 'path';
+import type { UserConfig } from 'vite';
 
 export default defineConfig((/* ctx */) => {
   return {
+    supportTS: {
+      tsCheckerConfig: {
+        eslint: {
+          enabled: true,
+          files: './src/**/*.{ts,tsx,js,jsx,vue}',
+        },
+      },
+    },
+
+    build: {
+      target: {
+        browser: ['es2022', 'firefox115', 'chrome115', 'safari14'],
+        node: 'node20',
+      },
+
+      typescript: {
+        strict: true,
+        vueShim: true,
+      },
+
+      vueRouterMode: 'history', // available values: 'hash', 'history'
+
+      // Публичный путь (для деплоя)
+      publicPath: '/',
+
+      // Настройки для production оптимизации
+      extendViteConf(viteConf: UserConfig) {
+        if (!viteConf.resolve) {
+          viteConf.resolve = {};
+        }
+
+        if (!viteConf.resolve.alias) {
+          viteConf.resolve.alias = {};
+        }
+
+        Object.assign(viteConf.resolve.alias, {
+          '@': path.resolve(__dirname, './src'),
+          '@components': path.resolve(__dirname, './src/components'),
+          '@pages': path.resolve(__dirname, './src/pages'),
+          '@stores': path.resolve(__dirname, './src/stores'),
+          '@types': path.resolve(__dirname, './src/types'),
+          '@composables': path.resolve(__dirname, './src/composables'),
+          '@services': path.resolve(__dirname, './src/services'),
+          '@utils': path.resolve(__dirname, './src/utils'),
+        });
+
+        // Проверяем и инициализируем объект server
+        if (!viteConf.server) {
+          viteConf.server = {};
+        }
+
+        if (!viteConf.server.proxy) {
+          viteConf.server.proxy = {};
+        }
+
+        // Настройка прокси для JSON Server
+        Object.assign(viteConf.server.proxy, {
+          '/api': {
+            target: 'http://localhost:3000',
+            changeOrigin: true,
+            /** @param {string} path */
+            rewrite: (path: string): string => path.replace(/^\/api/, ''),
+          },
+        });
+      },
+
+      // Оптимизация production сборки
+      productionSourceMap: false, // Отключаем source-maps
+
+      // Настройки для минификации и оптимизации
+      minify: true, // Включаем минификацию (terser/esbuild)
+
+      // Настройки для tree-shaking
+      vitePlugins: [
+        [
+          'vite-plugin-checker',
+          {
+            vueTsc: true,
+            eslint: {
+              lintCommand: 'eslint -c ./eslint.config.js "./src*/**/*.{ts,js,mjs,cjs,vue}"',
+              useFlatConfig: true,
+            },
+          },
+          { server: false },
+        ],
+      ],
+
+      // Дополнительные настройки code splitting
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // Разделяем библиотеки на отдельные чанки
+            vendor: ['vue', 'pinia', 'vue-router'],
+            quasar: ['quasar'],
+            draggable: ['vuedraggable'],
+            // Группируем UI компоненты
+            ui: [],
+          },
+        },
+      },
+
+      // Дополнительная оптимизация
+      uglifyOptions: {
+        compress: {
+          drop_console: true, // Удаляем console.log в production
+          drop_debugger: true,
+        },
+      },
+
+      // Настройки для улучшения производительности
+      gzip: true, // Включаем gzip сжатие
+      brotli: true, // Включаем brotli сжатие
+    },
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
 
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: [],
+    boot: ['pinia'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: ['app.scss'],
@@ -29,53 +144,6 @@ export default defineConfig((/* ctx */) => {
       'roboto-font', // optional, you are not bound to it
       'material-icons', // optional, you are not bound to it
     ],
-
-    // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#build
-    build: {
-      target: {
-        browser: ['es2022', 'firefox115', 'chrome115', 'safari14'],
-        node: 'node20',
-      },
-
-      typescript: {
-        strict: true,
-        vueShim: true,
-        // extendTsConfig (tsConfig) {}
-      },
-
-      vueRouterMode: 'hash', // available values: 'hash', 'history'
-      // vueRouterBase,
-      // vueDevtools,
-      // vueOptionsAPI: false,
-
-      // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
-
-      // publicPath: '/',
-      // analyze: true,
-      // env: {},
-      // rawDefine: {}
-      // ignorePublicFolder: true,
-      // minify: false,
-      // polyfillModulePreload: true,
-      // distDir
-
-      // extendViteConf (viteConf) {},
-      // viteVuePluginOptions: {},
-
-      vitePlugins: [
-        [
-          'vite-plugin-checker',
-          {
-            vueTsc: true,
-            eslint: {
-              lintCommand: 'eslint -c ./eslint.config.js "./src*/**/*.{ts,js,mjs,cjs,vue}"',
-              useFlatConfig: true,
-            },
-          },
-          { server: false },
-        ],
-      ],
-    },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#devserver
     devServer: {
@@ -98,7 +166,7 @@ export default defineConfig((/* ctx */) => {
       // directives: [],
 
       // Quasar plugins
-      plugins: [],
+      plugins: ['Notify'],
     },
 
     // animations: 'all', // --- includes all animations
@@ -120,6 +188,7 @@ export default defineConfig((/* ctx */) => {
 
     // https://v2.quasar.dev/quasar-cli-vite/developing-ssr/configuring-ssr
     ssr: {
+      pwa: false,
       prodPort: 3000, // The default port that the production server should use
       // (gets superseded if process.env.PORT is specified at runtime)
 
@@ -134,8 +203,6 @@ export default defineConfig((/* ctx */) => {
       // manualStoreSsrContextInjection: true,
       // manualStoreHydration: true,
       // manualPostHydrationTrigger: true,
-
-      pwa: false,
       // pwaOfflineHtmlFilename: 'offline.html', // do NOT use index.html as name!
 
       // pwaExtendGenerateSWOptions (cfg) {},
@@ -194,7 +261,7 @@ export default defineConfig((/* ctx */) => {
       builder: {
         // https://www.electron.build/configuration
 
-        appId: 'quasar-tasks-interface',
+        appId: 'quasar-task-manager',
       },
     },
 

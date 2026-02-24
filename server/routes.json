@@ -1,0 +1,6 @@
+{
+  "/api/*": "/$1",
+  "/api/tasks/:id": "/tasks/:id",
+  "/api/projects/:id": "/projects/:id",
+  "/api/users/:id": "/users/:id"
+}

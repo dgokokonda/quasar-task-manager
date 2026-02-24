@@ -3,7 +3,7 @@
     <div>
       <div style="font-size: 30vh">404</div>
 
-      <div class="text-h2" style="opacity: 0.4">Oops. Nothing here...</div>
+      <div class="text-h2" style="opacity: 0.4">Такой страницы не существует</div>
 
       <q-btn
         class="q-mt-xl"
@@ -18,6 +18,4 @@
   </div>
 </template>
 
-<script setup lang="ts">
-//
-</script>
+<script setup lang="ts"></script>
