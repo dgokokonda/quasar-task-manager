@@ -95,15 +95,16 @@ app.use(async (req, res, next) => {
   }
 
   if (isDeleteTask) {
-    const id = String(path.split('/').pop());
+    const id = Number(path.split('/').pop());
     if (id === undefined) {
       return res.status(404).json({ error: 'Task not found' });
     }
 
-    const updated = db.data.tasks.filter(t => t.id !== id);
+    const updated = db.data.tasks.filter(t => +t.id !== id);
     db.data.tasks = updated;
     await db.write();
-    return res.json();
+    return res.json(updated);
+
   }
 
   if (isPostTask) {
