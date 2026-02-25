@@ -9,14 +9,16 @@
       </div>
     </div>
 
-    <!-- <TaskFilters
+    <TaskFilters
       v-model:search="localFilters.search"
       v-model:statuses="localFilters.statuses"
       v-model:workType="localFilters.workType"
       v-model:assignee="localFilters.assigneeId"
+      v-model:sortOrder="localFilters.sortOrder"
+      v-model:sortBy="localFilters.sortBy"
       @apply="applyFilters"
       @reset="resetFilters"
-    /> -->
+    />
 
     <div class="row justify-end q-mb-md">
       <q-btn-toggle
@@ -66,20 +68,22 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
+import type { TaskFiltersType } from '@/types';
 import { useTasks } from '@/composables/useTasks';
 import { useTaskPage } from '@/composables/useTaskPage';
 import TaskTable from '@/components/tasks/TaskTable.vue';
 import TaskKanban from '@/components/tasks/TaskKanban.vue';
 import TaskForm from '@/components/tasks/TaskForm.vue';
-// import TaskFilters from '@/components/tasks/TaskFilters.vue';
+import TaskFilters from '@/components/tasks/TaskFilters.vue';
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue';
 
 const {
   loading,
   filters,
   filteredTasks,
-  // updateFilters,
-  // resetFilters,
+  updateFilters,
+  resetFilters: storeResetFilters,
   updateTasks,
 } = useTasks();
 
@@ -96,4 +100,27 @@ const {
   handleDeleteConfirm,
   handleStatusChange,
 } = useTaskPage();
+
+const localFilters = ref<TaskFiltersType>({
+  statuses: [],
+  search: '',
+  workType: [],
+  assigneeId: [],
+  sortBy: 'name',
+  sortOrder: 'asc',
+});
+const applyFilters = () => {
+  updateFilters(localFilters.value);
+};
+const resetFilters = () => {
+  localFilters.value = {
+    statuses: [],
+    search: '',
+    workType: [],
+    assigneeId: [],
+    sortBy: 'name',
+    sortOrder: 'asc',
+  };
+  storeResetFilters();
+};
 </script>

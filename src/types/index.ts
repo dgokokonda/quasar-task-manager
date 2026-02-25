@@ -29,12 +29,20 @@ export interface User {
   role: string;
 }
 
-export interface TaskFilters {
+export interface TaskFiltersType {
   statuses: TaskStatus[];
-  workType?: WorkType;
-  assigneeId?: number;
+  workType: WorkType[];
+  assigneeId: number[];
   search: string;
-  sortBy: 'order' | 'startDate' | 'endDate' | 'plannedHours' | 'actualHours';
+  sortBy:
+    | 'name'
+    | 'startDate'
+    | 'endDate'
+    | 'plannedHours'
+    | 'actualHours'
+    // | 'status'
+    // | 'workType'
+    | 'order';
   sortOrder: 'asc' | 'desc';
 }
 

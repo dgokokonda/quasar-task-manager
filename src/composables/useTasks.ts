@@ -20,8 +20,8 @@ export function useTasks() {
     deleteTask: store.deleteTask,
     getTaskByStatus,
     updateTaskStatus: store.updateTask,
+    updateTasks: store.updateTasks,
     updateFilters: store.updateFilters,
     resetFilters: store.resetFilters,
-    updateTasks: store.updateTasks,
   };
 }

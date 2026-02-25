@@ -3,15 +3,23 @@ import { useTasks } from '@/composables/useTasks';
 import type { Task, TaskStatus } from '@/types';
 
 export function useTaskPage() {
-  const { fetchTasks, createTask, updateTask, deleteTask, updateTaskStatus } = useTasks();
+  const {
+    fetchTasks,
+    createTask,
+    updateTask,
+    deleteTask,
+    updateTaskStatus,
+    filters,
+    filteredTasks,
+    resetFilters,
+    updateFilters,
+  } = useTasks();
 
   const viewMode = ref<'table' | 'kanban'>('table');
   const showFormDialog = ref(false);
   const showConfirmDialog = ref(false);
   const selectedTask = ref<Task | null>(null);
   const taskToDelete = ref<Task | null>(null);
-
-  // const localFilters = ref({ ...filters.value });
 
   onMounted(async () => {
     await fetchTasks();
@@ -75,6 +83,8 @@ export function useTaskPage() {
     showConfirmDialog,
     selectedTask,
     taskToDelete,
+    filters,
+    filteredTasks,
 
     openEditDialog,
     confirmDelete,
@@ -82,5 +92,7 @@ export function useTaskPage() {
     handleTaskSave,
     handleDeleteConfirm,
     handleStatusChange,
+    resetFilters,
+    updateFilters,
   };
 }

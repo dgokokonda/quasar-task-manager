@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { taskService } from '@/services/taskService';
-import type { Task, TaskFilters } from '@/types';
+import type { Task, TaskFiltersType } from '@/types';
 import { useQuasar } from 'quasar';
 
 export const useTaskStore = defineStore('tasks', () => {
@@ -10,10 +10,12 @@ export const useTaskStore = defineStore('tasks', () => {
   const tasks = ref<Task[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
-  const filters = ref<TaskFilters>({
+  const filters = ref<TaskFiltersType>({
     statuses: [],
     search: '',
-    sortBy: 'order',
+    workType: [],
+    assigneeId: [],
+    sortBy: 'name',
     sortOrder: 'asc',
   });
 
@@ -29,13 +31,13 @@ export const useTaskStore = defineStore('tasks', () => {
       result = result.filter((task) => task.name.toLowerCase().includes(searchLower));
     }
 
-    if (filters.value.workType) {
-      result = result.filter((task) => task.workType === filters.value.workType);
+    if (filters.value.workType.length) {
+      result = result.filter((task) => filters.value.workType.includes(task.workType));
     }
 
-    if (filters.value.assigneeId) {
-      const assigneeId = filters.value.assigneeId;
-      result = result.filter((task) => task.assignees.includes(assigneeId));
+    if (filters.value.assigneeId?.length) {
+      const assignee = new Set(filters.value.assigneeId);
+      result = result.filter((task) => task.assignees.some((t) => assignee.has(t)));
     }
 
     const fieldName = filters.value.sortBy;
@@ -170,10 +172,6 @@ export const useTaskStore = defineStore('tasks', () => {
     }
   }
 
-  function updateFilters(newFilters: Partial<TaskFilters>) {
-    filters.value = { ...filters.value, ...newFilters };
-  }
-
   const updateTasks = async (updatedTasks: Task[]) => {
     const response = await taskService.updateTasksOrder(updatedTasks);
     if (response) {
@@ -181,10 +179,16 @@ export const useTaskStore = defineStore('tasks', () => {
     } else throw new Error('Update tasks error');
   };
 
+  function updateFilters(newFilters: Partial<TaskFiltersType>) {
+    filters.value = { ...filters.value, ...newFilters };
+  }
+
   function resetFilters() {
     filters.value = {
       statuses: [],
       search: '',
+      workType: [],
+      assigneeId: [],
       sortBy: 'order',
       sortOrder: 'asc',
     };
