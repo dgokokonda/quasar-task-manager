@@ -5,8 +5,8 @@
         <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
         <q-toolbar-title class="text-weight-bold"> Планировщик постпродакшена </q-toolbar-title>
         <q-space />
-        <q-btn flat round dense icon="notifications" />
-        <q-btn flat round dense icon="account_circle" />
+        <q-btn flat round dense icon="notifications" disabled />
+        <q-btn flat round dense icon="account_circle" disabled />
       </q-toolbar>
     </q-header>
 

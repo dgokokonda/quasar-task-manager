@@ -1,4 +1,4 @@
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useTasks } from '@/composables/useTasks';
 import type { Task, TaskStatus } from '@/types';
 
@@ -15,6 +15,11 @@ export function useTaskPage() {
 
   onMounted(async () => {
     await fetchTasks();
+  });
+
+  onMounted(() => {
+    const mode = localStorage.getItem('mode') as 'table' | 'kanban' | null;
+    if (mode && mode !== viewMode.value) viewMode.value = mode;
   });
 
   const showCreateDialog = () => {
@@ -59,6 +64,10 @@ export function useTaskPage() {
       console.error(error);
     }
   };
+
+  watch(viewMode, (newValue) => {
+    localStorage.setItem('mode', newValue);
+  });
 
   return {
     viewMode,

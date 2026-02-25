@@ -3,7 +3,7 @@ import { userService } from '@/services/userService';
 import { ref } from 'vue';
 import type { User } from '@/types';
 
-export const userStore = defineStore('userStore', () => {
+export const useUserStore = defineStore('userStore', () => {
   const users = ref<User[]>([]);
 
   async function fetchUsers() {
