@@ -111,8 +111,10 @@ app.use(async (req, res, next) => {
   const isPutTasks = req.method === 'PUT' && path === '/tasks';
   const isPatchOrder = req.method === 'PATCH' && path === '/tasks/order';
   const isPatchTask = req.method === 'PATCH' && /^\/tasks\/\d+$/.test(path);
+  const isDeleteTask = req.method === 'DELETE' && /^\/tasks\/\d+$/.test(path);
+  const isPostTask = req.method === 'POST' && path === '/tasks';
 
-  if (!isPutTasks && !isPatchOrder && !isPatchTask /*&& !isDeleteTask && !isPostTask*/) return next();
+  if (!isPutTasks && !isPatchOrder && !isPatchTask && !isDeleteTask && !isPostTask) return next();
 
   let body;
   try {
@@ -169,34 +171,34 @@ app.use(async (req, res, next) => {
     return res.json(updated);
   }
 
-  // if (isDeleteTask) {
-  //   const id = Number(path.split('/').pop());
-  //   if (id === undefined) {
-  //     return res.status(404).json({ error: 'Task not found' });
-  //   }
+  if (isDeleteTask) {
+    const id = Number(path.split('/').pop());
+    if (id === undefined) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
 
-  //   const updated = db.data.tasks.filter(t => +t.id !== id);
-  //   db.data.tasks = updated;
-  //   await db.write();
-  //   return res.json(updated);
+    const updated = db.data.tasks.filter(t => +t.id !== id);
+    db.data.tasks = updated;
+    await db.write();
+    return res.json(updated);
 
-  // }
+  }
 
-  // if (isPostTask) {
-  //   const tasks = db.data.tasks;
-  //   if (!Array.isArray(tasks)) {
-  //     return res.status(500).json({ error: 'tasks not array' });
-  //   }
+  if (isPostTask) {
+    const tasks = db.data.tasks;
+    if (!Array.isArray(tasks)) {
+      return res.status(500).json({ error: 'tasks not array' });
+    }
 
-  //   if (!body) {
-  //     return res.status(500).json({ error: 'invalid data' });
-  //   }
+    if (!body) {
+      return res.status(500).json({ error: 'invalid data' });
+    }
 
-  //   const normalized = { ...body, id: Date.now(), order: db.data.tasks.length + 1 };
-  //   db.data.tasks.push(normalized);
-  //   await db.write();
-  //   return res.json(normalized);
-  // }
+    const normalized = { ...body, id: Date.now(), order: db.data.tasks.length + 1 };
+    db.data.tasks.push(normalized);
+    await db.write();
+    return res.json(normalized);
+  }
 
   next();
 });
