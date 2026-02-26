@@ -18,6 +18,7 @@
         </tr>
       </thead>
       <draggable-component
+        v-if="draggableTasks.length"
         v-model="draggableTasks"
         item-key="id"
         tag="tbody"
@@ -67,6 +68,9 @@
           </tr>
         </template>
       </draggable-component>
+      <tfoot v-else class="empty">
+        <div>Список задач пуст</div>
+      </tfoot>
     </table>
   </div>
 </template>
@@ -96,3 +100,11 @@ const draggableTasks = computed({
   set: (list: Task[]) => emit('update', list),
 });
 </script>
+<style scoped lang="scss">
+tfoot.empty div {
+  width: 100%;
+  display: block;
+  position: absolute;
+  text-align: center;
+}
+</style>
