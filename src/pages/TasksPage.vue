@@ -106,7 +106,7 @@ const localFilters = ref<TaskFiltersType>({
   search: '',
   workType: [],
   assigneeId: [],
-  sortBy: 'name',
+  sortBy: 'order',
   sortOrder: 'asc',
 });
 const applyFilters = () => {
@@ -118,7 +118,7 @@ const resetFilters = () => {
     search: '',
     workType: [],
     assigneeId: [],
-    sortBy: 'name',
+    sortBy: 'order',
     sortOrder: 'asc',
   };
   storeResetFilters();

@@ -6,17 +6,23 @@ import type { Task } from '@/types';
 export interface GetTasksParams {
   page?: number;
   limit?: number;
-  sort?: string;
-  order?: 'asc' | 'desc';
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+// Элемент дельты порядка: только id и новый order (индекс)
+export interface OrderDeltaItem {
+  id: number;
+  order: number;
 }
 
 export const taskService = {
-  async getTasks(/*params?: GetTasksParams*/): Promise<Task[]> {
+  async getTasks(params?: GetTasksParams): Promise<Task[]> {
     const search = new URLSearchParams();
-    // if (params?.page != null) search.set('_page', String(params.page));
-    // if (params?.limit != null) search.set('_limit', String(params.limit));
-    // if (params?.sort != null) search.set('_sort', params.sort);
-    // if (params?.order != null) search.set('_order', params.order);
+    if (params?.page != null) search.set('_page', String(params.page));
+    if (params?.limit != null) search.set('_limit', String(params.limit));
+    if (params?.sortBy != null) search.set('_sort', params.sortBy);
+    if (params?.sortOrder != null) search.set('_order', params.sortOrder);
     const query = search.toString();
     const url = query ? `/tasks?${query}` : '/tasks';
     return apiService.get<Task[]>(url);
@@ -43,10 +49,11 @@ export const taskService = {
   },
 
   /**
-   * PUT /tasks — замена всего списка (после drag-drop).
-   * Использовать только для смены порядка задач.
+   * PATCH /tasks/order — дельта порядка после drag-drop.
+   * Тело: { orders: [{ id, order }, ...] } — только задачи, у которых изменился order. Минимум трафика при тысячах записей.
    */
-  async updateTasksOrder(tasks: Task[]): Promise<Task[]> {
-    return apiService.put<Task[]>('/tasks', tasks);
+  async updateTasksOrderDelta(orders: OrderDeltaItem[]): Promise<void> {
+    if (orders.length === 0) return;
+    await apiService.patch('/tasks/order', { orders });
   },
 };

@@ -50,14 +50,69 @@ function readBody(req) {
 
 const app = new App();
 
+// Убираем префикс /api из URL, чтобы json-server видел /tasks, а не /api/tasks.
+app.use((req, res, next) => {
+  const u = req.url ?? '';
+  if (String(u).startsWith('/api')) {
+    const rewritten = u.replace(/^\/api/, '') || '/';
+    req.url = rewritten;
+    req.originalUrl = rewritten;
+  }
+  next();
+});
+
+// GET /tasks — отдаём список из db сами (надёжно при любом порядке middleware).
+app.use((req, res, next) => {
+  if (req.method !== 'GET') return next();
+  const path = pathname(req);
+  if (path !== '/tasks') return next();
+  const tasks = db.data?.tasks;
+  if (!Array.isArray(tasks)) {
+    return res.status(500).json({ error: 'tasks not array' });
+  }
+  const queryString = (req.url ?? '').split('?')[1] ?? '';
+  const params = new URLSearchParams(queryString);
+  const sort = params.get('_sort');
+  const order = params.get('_order') || 'asc';
+  let result = [...tasks];
+  if (sort && typeof tasks[0]?.[sort] !== 'undefined') {
+    const mult = order === 'desc' ? -1 : 1;
+    result.sort((a, b) => {
+      const aVal = a[sort];
+      const bVal = b[sort];
+      if (aVal == null && bVal == null) return 0;
+      if (aVal == null) return 1 * mult;
+      if (bVal == null) return -1 * mult;
+      if (typeof aVal === 'number' && typeof bVal === 'number') return (aVal - bVal) * mult;
+      return String(aVal).localeCompare(String(bVal), 'ru') * mult;
+    });
+  }
+  return res.json(result);
+});
+
+// GET /tasks/:id — одна задача.
+app.use((req, res, next) => {
+  if (req.method !== 'GET') return next();
+  const path = pathname(req);
+  const match = path.match(/^\/tasks\/(\d+)$/);
+  if (!match) return next();
+  const id = Number(match[1]);
+  const tasks = db.data?.tasks;
+  if (!Array.isArray(tasks)) {
+    return res.status(500).json({ error: 'tasks not array' });
+  }
+  const task = tasks.find((t) => Number(t.id) === id);
+  if (!task) return res.status(404).json({ error: 'Task not found' });
+  return res.json(task);
+});
+
 app.use(async (req, res, next) => {
   const path = pathname(req);
   const isPutTasks = req.method === 'PUT' && path === '/tasks';
+  const isPatchOrder = req.method === 'PATCH' && path === '/tasks/order';
   const isPatchTask = req.method === 'PATCH' && /^\/tasks\/\d+$/.test(path);
-  const isDeleteTask = req.method === 'DELETE' && /^\/tasks\/\d+$/.test(path);
-  const isPostTask = req.method === 'POST' && path === '/tasks';
 
-  if (!isPutTasks && !isPatchTask && !isDeleteTask && !isPostTask) return next();
+  if (!isPutTasks && !isPatchOrder && !isPatchTask /*&& !isDeleteTask && !isPostTask*/) return next();
 
   let body;
   try {
@@ -77,6 +132,26 @@ app.use(async (req, res, next) => {
     return res.json(db.data.tasks);
   }
 
+  if (isPatchOrder) {
+    const orders = body?.orders;
+    if (!Array.isArray(orders) || orders.length === 0) {
+      return res.status(400).json({ error: 'Body must be { orders: [{ id, order }, ...] }' });
+    }
+    const tasks = db.data.tasks;
+    if (!Array.isArray(tasks)) {
+      return res.status(500).json({ error: 'tasks not array' });
+    }
+    const idToIndex = new Map(tasks.map((t, i) => [Number(t.id), i]));
+    for (const { id, order } of orders) {
+      const idx = idToIndex.get(Number(id));
+      if (idx !== undefined && typeof order === 'number') {
+        tasks[idx] = { ...tasks[idx], order };
+      }
+    }
+    await db.write();
+    return res.json({ ok: true });
+  }
+
   if (isPatchTask) {
     const id = Number(path.split('/').pop());
     const tasks = db.data.tasks;
@@ -94,34 +169,34 @@ app.use(async (req, res, next) => {
     return res.json(updated);
   }
 
-  if (isDeleteTask) {
-    const id = Number(path.split('/').pop());
-    if (id === undefined) {
-      return res.status(404).json({ error: 'Task not found' });
-    }
+  // if (isDeleteTask) {
+  //   const id = Number(path.split('/').pop());
+  //   if (id === undefined) {
+  //     return res.status(404).json({ error: 'Task not found' });
+  //   }
 
-    const updated = db.data.tasks.filter(t => +t.id !== id);
-    db.data.tasks = updated;
-    await db.write();
-    return res.json(updated);
+  //   const updated = db.data.tasks.filter(t => +t.id !== id);
+  //   db.data.tasks = updated;
+  //   await db.write();
+  //   return res.json(updated);
 
-  }
+  // }
 
-  if (isPostTask) {
-    const tasks = db.data.tasks;
-    if (!Array.isArray(tasks)) {
-      return res.status(500).json({ error: 'tasks not array' });
-    }
+  // if (isPostTask) {
+  //   const tasks = db.data.tasks;
+  //   if (!Array.isArray(tasks)) {
+  //     return res.status(500).json({ error: 'tasks not array' });
+  //   }
 
-    if (!body) {
-      return res.status(500).json({ error: 'invalid data' });
-    }
+  //   if (!body) {
+  //     return res.status(500).json({ error: 'invalid data' });
+  //   }
 
-    const normalized = { ...body, id: Date.now(), order: db.data.tasks.length + 1 };
-    db.data.tasks.push(normalized);
-    await db.write();
-    return res.json(normalized);
-  }
+  //   const normalized = { ...body, id: Date.now(), order: db.data.tasks.length + 1 };
+  //   db.data.tasks.push(normalized);
+  //   await db.write();
+  //   return res.json(normalized);
+  // }
 
   next();
 });

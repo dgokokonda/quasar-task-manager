@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { taskService } from '@/services/taskService';
+import { taskService, type OrderDeltaItem } from '@/services/taskService';
 import type { Task, TaskFiltersType } from '@/types';
 import { useQuasar } from 'quasar';
 
@@ -15,7 +15,7 @@ export const useTaskStore = defineStore('tasks', () => {
     search: '',
     workType: [],
     assigneeId: [],
-    sortBy: 'name',
+    sortBy: 'order',
     sortOrder: 'asc',
   });
 
@@ -45,7 +45,19 @@ export const useTaskStore = defineStore('tasks', () => {
 
     if (result.length <= 1) return result;
 
+    // Порядок выводим из индекса в tasks.value (O(1) на задачу), без поля order на каждом объекте
+    const orderByIndex =
+      fieldName === 'order' && tasks.value.length > 0
+        ? new Map(tasks.value.map((t, i) => [t.id, i]))
+        : null;
+
     return [...result].sort((a, b) => {
+      if (orderByIndex) {
+        const aIdx = orderByIndex.get(a.id) ?? 0;
+        const bIdx = orderByIndex.get(b.id) ?? 0;
+        return (aIdx - bIdx) * sortOrder;
+      }
+
       const aVal = a[fieldName];
       const bVal = b[fieldName];
 
@@ -53,9 +65,6 @@ export const useTaskStore = defineStore('tasks', () => {
       if (bVal == null) return -1 * sortOrder;
       if (aVal === bVal) return 0;
 
-      if (fieldName === 'order') {
-        return (Number(aVal) - Number(bVal)) * sortOrder;
-      }
       if (fieldName === 'startDate' || fieldName === 'endDate') {
         const aTime = new Date(aVal).getTime();
         const bTime = new Date(bVal).getTime();
@@ -74,9 +83,12 @@ export const useTaskStore = defineStore('tasks', () => {
     loading.value = true;
     error.value = null;
     try {
-      const response = await taskService.getTasks();
+      const response = await taskService.getTasks({
+        sortBy: 'order',
+        sortOrder: 'asc',
+      });
       if (response) {
-        tasks.value = response.map((t, i) => ({ ...t, order: i }));
+        tasks.value = response.map((t, i) => ({ ...t, order: t.order ?? i }));
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch tasks';
@@ -172,12 +184,53 @@ export const useTaskStore = defineStore('tasks', () => {
     }
   }
 
-  const updateTasks = async (updatedTasks: Task[]) => {
-    const response = await taskService.updateTasksOrder(updatedTasks);
-    if (response) {
-      tasks.value = response.map((t, i) => ({ ...t, order: i }));
-    } else throw new Error('Update tasks error');
-  };
+  // Обновление порядка (после drag-drop). Отправляется только дельта изменённых order.
+  async function updateTasks(updatedTasks: Task[]) {
+    const current = tasks.value;
+    if (current.length === 0) return;
+
+    const oldOrder = new Map<number, number>(current.map((t, i) => [t.id, t.order ?? i]));
+    const visibleIds = new Set(updatedTasks.map((t) => t.id));
+
+    // Новый глобальный порядок: видимые таски по позициям в updatedTasks (от 0 до n), остальные в старом относительном порядке
+    const newOrder = new Map<number, number>();
+    updatedTasks.forEach((t, i) => newOrder.set(t.id, i));
+    let nextOrder = updatedTasks.length;
+    const rest = current
+      .filter((t) => !visibleIds.has(t.id))
+      .sort((a, b) => (oldOrder.get(a.id) ?? 0) - (oldOrder.get(b.id) ?? 0));
+    rest.forEach((t) => {
+      newOrder.set(t.id, nextOrder++);
+    });
+
+    const delta: OrderDeltaItem[] = [];
+    newOrder.forEach((order, id) => {
+      if (oldOrder.get(id) !== order) delta.push({ id, order });
+    });
+    if (delta.length === 0) return;
+
+    loading.value = true;
+    error.value = null;
+    try {
+      await taskService.updateTasksOrderDelta(delta);
+      // Локально применяем новый порядок
+      const byId = new Map(current.map((t) => [t.id, t]));
+      const ordered = [...newOrder.entries()]
+        .sort((a, b) => a[1] - b[1])
+        .map(([id]) => byId.get(id)!)
+        .filter(Boolean);
+      ordered.forEach((t, i) => {
+        (t as Task).order = i;
+      });
+      tasks.value = ordered;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to update order';
+      console.error('Update order error:', err);
+      error.value = message;
+    } finally {
+      loading.value = false;
+    }
+  }
 
   function updateFilters(newFilters: Partial<TaskFiltersType>) {
     filters.value = { ...filters.value, ...newFilters };
