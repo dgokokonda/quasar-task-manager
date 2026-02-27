@@ -53,6 +53,9 @@
         :tasks="tasks"
         @status-change="handleStatusChange"
         @edit="openEditDialog"
+        @delete="confirmDelete"
+        @update="updateTasks"
+        @update-status="updateTask"
       />
     </template>
   </q-page>
@@ -78,7 +81,8 @@ import TaskForm from '@/components/tasks/TaskForm.vue';
 import TaskFilters from '@/components/tasks/TaskFilters.vue';
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue';
 
-const { loading, filters, tasks, updateFilters, resetFilters, updateTasks } = useTasks();
+const { loading, filters, tasks, updateFilters, resetFilters, updateTasks, updateTask } =
+  useTasks();
 
 const {
   viewMode,

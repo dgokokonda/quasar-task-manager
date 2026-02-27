@@ -10,7 +10,7 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
+    <q-drawer v-model="leftDrawerOpen" show-if-above bordered :breakpoint="1200">
       <q-list>
         <q-item to="/" exact clickable v-ripple>
           <q-item-section avatar>

@@ -34,3 +34,5 @@ export const MOCK_USERS: User[] = [
   { id: 3, name: 'Мария Иванова', role: 'Звукорежиссер' },
   { id: 4, name: 'Алексей Козлов', role: 'Motion-дизайнер' },
 ];
+
+export const KANBAN_COLUMN_HEIGHT = '70vh';
