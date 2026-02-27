@@ -20,7 +20,9 @@
       <draggable-component
         v-if="draggableTasks.length"
         v-model="draggableTasks"
+        @end="onDragEnd"
         item-key="id"
+        group="tasks"
         tag="tbody"
         handle=".drag-handle"
         class="q-table__tbody"
@@ -68,16 +70,19 @@
           </tr>
         </template>
       </draggable-component>
-      <tfoot v-else class="empty">
-        <div>Список задач пуст</div>
+      <tfoot v-else-if="!draggableTasks.length && !loading" class="empty">
+        <tr>
+          Список задач пуст
+        </tr>
       </tfoot>
     </table>
   </div>
 </template>
 <script setup lang="ts">
 import { useTaskTable } from '@/composables/useTaskTable';
+import type { OrderDeltaItem } from '@/services/taskService';
 import draggableComponent from 'vuedraggable';
-import { computed } from 'vue';
+import { ref, watch } from 'vue';
 import type { Task, TaskStatus, WorkType } from '@/types';
 import { STATUS_COLORS, STATUS_LABELS, WORK_TYPE_LABELS } from '@/types';
 interface Props {
@@ -86,19 +91,42 @@ interface Props {
   search: string;
 }
 
+interface DragEndEvt {
+  newIndex: number;
+  oldIndex: number;
+}
+
 const props = defineProps<Props>();
 const emit = defineEmits<{
   (e: 'edit', task: Task): void;
   (e: 'delete', task: Task): void;
-  (e: 'update', tasks: Task[]): void;
+  (e: 'update', delta: OrderDeltaItem[], tasks: Task[]): void;
 }>();
 
 const { columns, getUserInitials, getUserName, getProjectName, formatDate } = useTaskTable();
 
-const draggableTasks = computed({
-  get: () => props.tasks,
-  set: (list: Task[]) => emit('update', list),
-});
+const draggableTasks = ref<Task[]>([...props.tasks]);
+
+watch(
+  () => props.tasks,
+  (newTasks) => {
+    draggableTasks.value = [...newTasks];
+  },
+  { deep: true },
+);
+
+const onDragEnd = (evt: DragEndEvt) => {
+  const delta =
+    evt.newIndex < evt.oldIndex
+      ? draggableTasks.value.slice(evt.newIndex, evt.oldIndex + 1)
+      : draggableTasks.value.slice(evt.oldIndex, evt.newIndex + 1);
+  const startIndex = evt.newIndex < evt.oldIndex ? evt.newIndex : evt.oldIndex;
+  const deltaOrder = delta.map((el, i) => ({
+    id: el.id,
+    order: startIndex + i,
+  }));
+  emit('update', deltaOrder, draggableTasks.value);
+};
 </script>
 <style scoped lang="scss">
 tfoot.empty div {

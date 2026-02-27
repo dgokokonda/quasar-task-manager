@@ -40,7 +40,7 @@
     <template v-else>
       <TaskTable
         v-if="viewMode === 'table'"
-        :tasks="filteredTasks"
+        :tasks="tasks"
         :loading="loading"
         :search="filters.search"
         @edit="openEditDialog"
@@ -50,9 +50,12 @@
 
       <TaskKanban
         v-else
-        :tasks="filteredTasks"
+        :tasks="tasks"
         @status-change="handleStatusChange"
         @edit="openEditDialog"
+        @delete="confirmDelete"
+        @update="updateTasks"
+        @update-status="updateTask"
       />
     </template>
   </q-page>
@@ -68,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import type { TaskFiltersType } from '@/types';
 import { useTasks } from '@/composables/useTasks';
 import { useTaskPage } from '@/composables/useTaskPage';
@@ -78,14 +81,8 @@ import TaskForm from '@/components/tasks/TaskForm.vue';
 import TaskFilters from '@/components/tasks/TaskFilters.vue';
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue';
 
-const {
-  loading,
-  filters,
-  filteredTasks,
-  updateFilters,
-  resetFilters: storeResetFilters,
-  updateTasks,
-} = useTasks();
+const { loading, filters, tasks, updateFilters, resetFilters, updateTasks, updateTask } =
+  useTasks();
 
 const {
   viewMode,
@@ -101,26 +98,15 @@ const {
   handleStatusChange,
 } = useTaskPage();
 
-const localFilters = ref<TaskFiltersType>({
-  statuses: [],
-  search: '',
-  workType: [],
-  assigneeId: [],
-  sortBy: 'name',
-  sortOrder: 'asc',
-});
-const applyFilters = () => {
-  updateFilters(localFilters.value);
+const localFilters = ref<TaskFiltersType>(filters.value);
+const applyFilters = async () => {
+  await updateFilters(localFilters.value);
 };
-const resetFilters = () => {
-  localFilters.value = {
-    statuses: [],
-    search: '',
-    workType: [],
-    assigneeId: [],
-    sortBy: 'name',
-    sortOrder: 'asc',
-  };
-  storeResetFilters();
-};
+watch(
+  () => filters.value,
+  (newVal) => {
+    if (newVal) localFilters.value = { ...filters.value };
+  },
+  { immediate: true, deep: true },
+);
 </script>

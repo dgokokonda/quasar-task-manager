@@ -1,22 +1,24 @@
 import { apiService } from './api';
-import type { Task } from '@/types';
+import type { Task, TaskFiltersType } from '@/types';
 
 // Параметры для постраничной загрузки (для будущей пагинации).
 // json-server: GET /tasks?_page=1&_limit=20
 export interface GetTasksParams {
   page?: number;
   limit?: number;
-  sort?: string;
-  order?: 'asc' | 'desc';
+}
+
+// Элемент дельты порядка: только id и новый order (индекс)
+export interface OrderDeltaItem {
+  id: number;
+  order: number;
 }
 
 export const taskService = {
-  async getTasks(/*params?: GetTasksParams*/): Promise<Task[]> {
+  async getTasks(params?: GetTasksParams): Promise<Task[]> {
     const search = new URLSearchParams();
-    // if (params?.page != null) search.set('_page', String(params.page));
-    // if (params?.limit != null) search.set('_limit', String(params.limit));
-    // if (params?.sort != null) search.set('_sort', params.sort);
-    // if (params?.order != null) search.set('_order', params.order);
+    if (params?.page != null) search.set('_page', String(params.page));
+    if (params?.limit != null) search.set('_limit', String(params.limit));
     const query = search.toString();
     const url = query ? `/tasks?${query}` : '/tasks';
     return apiService.get<Task[]>(url);
@@ -43,10 +45,17 @@ export const taskService = {
   },
 
   /**
-   * PUT /tasks — замена всего списка (после drag-drop).
-   * Использовать только для смены порядка задач.
+   * PATCH /tasks/order — дельта порядка после drag-drop.
+   * Тело: { orders: [{ id, order }, ...] } — только задачи, у которых изменился order. Минимум трафика при тысячах записей.
    */
-  async updateTasksOrder(tasks: Task[]): Promise<Task[]> {
-    return apiService.put<Task[]>('/tasks', tasks);
+  async updateTasksOrderDelta(orders: OrderDeltaItem[]): Promise<void> {
+    if (orders.length === 0) return;
+    await apiService.patch('/tasks/order', { orders });
+  },
+  async getFilters(): Promise<TaskFiltersType> {
+    return await apiService.get<TaskFiltersType>('/filters');
+  },
+  async applyFilters(newFilters: Partial<TaskFiltersType>): Promise<TaskFiltersType> {
+    return await apiService.put<TaskFiltersType>('/filters/apply', newFilters);
   },
 };

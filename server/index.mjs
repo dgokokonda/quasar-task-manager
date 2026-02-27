@@ -48,16 +48,112 @@ function readBody(req) {
   });
 }
 
+const filteredTasks = (filters, tasks) => {
+  let result = [...tasks];
+
+  if (filters.statuses.length) {
+    result = result.filter((task) => filters.statuses.includes(task.status));
+  }
+
+  if (filters.search) {
+    const searchLower = filters.search.toLowerCase();
+    result = result.filter((task) => task.name.toLowerCase().includes(searchLower));
+  }
+
+  if (filters.workType.length) {
+    result = result.filter((task) => filters.workType.includes(task.workType));
+  }
+
+  if (filters.assigneeId?.length) {
+    const assignee = new Set(filters.assigneeId);
+    result = result.filter((task) => task.assignees.some((t) => assignee.has(t)));
+  }
+
+  const fieldName = filters.sortBy;
+  const sortOrder = filters.sortOrder === 'asc' ? 1 : -1;
+
+  if (result.length <= 1) return result;
+
+  return [...result].sort((a, b) => {
+    const aVal = a[fieldName];
+    const bVal = b[fieldName];
+
+    if (aVal == null) return 1 * sortOrder;
+    if (bVal == null) return -1 * sortOrder;
+    if (aVal == null && bVal == null) return 0;
+
+    if (fieldName === 'startDate' || fieldName === 'endDate') {
+      const aTime = new Date(aVal).getTime();
+      const bTime = new Date(bVal).getTime();
+      return (aTime - bTime) * sortOrder;
+    }
+
+    if (typeof aVal === 'string' && typeof bVal === 'string') {
+      return String(aVal).localeCompare(String(bVal), 'ru') * sortOrder;
+    }
+
+    return (Number(aVal) - Number(bVal)) * sortOrder;
+  });
+};
+
 const app = new App();
+
+// Убираем префикс /api из URL, чтобы json-server видел /tasks, а не /api/tasks.
+app.use((req, res, next) => {
+  const u = req.url ?? '';
+  if (String(u).startsWith('/api')) {
+    const rewritten = u.replace(/^\/api/, '') || '/';
+    req.url = rewritten;
+    req.originalUrl = rewritten;
+  }
+  next();
+});
+
+// GET /tasks — отдаём список из db сами (надёжно при любом порядке middleware).
+app.use((req, res, next) => {
+  if (req.method !== 'GET') return next();
+  const path = pathname(req);
+
+  if (path !== '/tasks') return next();
+  const tasks = db.data?.tasks;
+  const filters = db.data?.filters
+  if (!Array.isArray(tasks)) {
+    return res.status(500).json({ error: 'tasks not array' });
+  }
+  // const queryString = (req.url ?? '').split('?')[1] ?? '';
+  // const params = new URLSearchParams(queryString);
+  // const page = params.get('_page') || 0;
+  // const limit = params.get('_limit') || 20;
+  const result = filteredTasks(filters, tasks);
+  return res.json(result);
+});
+
+// GET /tasks/:id — одна задача.
+app.use((req, res, next) => {
+  if (req.method !== 'GET') return next();
+  const path = pathname(req);
+  const match = path.match(/^\/tasks\/(\d+)$/);
+  if (!match) return next();
+  const id = Number(match[1]);
+  const tasks = db.data?.tasks;
+  if (!Array.isArray(tasks)) {
+    return res.status(500).json({ error: 'tasks not array' });
+  }
+  const task = tasks.find((t) => Number(t.id) === id);
+  if (!task) return res.status(404).json({ error: 'Task not found' });
+  return res.json(task);
+});
 
 app.use(async (req, res, next) => {
   const path = pathname(req);
   const isPutTasks = req.method === 'PUT' && path === '/tasks';
+  const isPatchOrder = req.method === 'PATCH' && path === '/tasks/order';
   const isPatchTask = req.method === 'PATCH' && /^\/tasks\/\d+$/.test(path);
   const isDeleteTask = req.method === 'DELETE' && /^\/tasks\/\d+$/.test(path);
   const isPostTask = req.method === 'POST' && path === '/tasks';
+  const isPutFilters = req.method === 'PUT' && path === '/filters/apply';
 
-  if (!isPutTasks && !isPatchTask && !isDeleteTask && !isPostTask) return next();
+  if (!isPutTasks && !isPatchOrder && !isPatchTask && !isDeleteTask && !isPostTask && !isPutFilters) return next();
 
   let body;
   try {
@@ -75,6 +171,26 @@ app.use(async (req, res, next) => {
     db.data.tasks = normalized;
     await db.write();
     return res.json(db.data.tasks);
+  }
+
+  if (isPatchOrder) {
+    const orders = body?.orders;
+    if (!Array.isArray(orders) || orders.length === 0) {
+      return res.status(400).json({ error: 'Body must be { orders: [{ id, order }, ...] }' });
+    }
+    const tasks = db.data.tasks;
+    if (!Array.isArray(tasks)) {
+      return res.status(500).json({ error: 'tasks not array' });
+    }
+    const idToIndex = new Map(tasks.map((t, i) => [Number(t.id), i]));
+    for (const { id, order } of orders) {
+      const idx = idToIndex.get(Number(id));
+      if (idx !== undefined && typeof order === 'number') {
+        tasks[idx] = { ...tasks[idx], order };
+      }
+    }
+    await db.write();
+    return res.json({ ok: true });
   }
 
   if (isPatchTask) {
@@ -123,6 +239,16 @@ app.use(async (req, res, next) => {
     return res.json(normalized);
   }
 
+  if (isPutFilters) {
+    if (!body || !(body instanceof Object)) {
+      return res.status(500).json({ error: 'invalid data' });
+    }
+
+    db.data.filters = { ...body }
+    await db.write();
+    return res.json(db.data.filters);
+  }
+
   next();
 });
 
@@ -131,5 +257,5 @@ app.use(jsonServerApp);
 
 app.listen(port, () => {
   console.log(`JSON Server (custom) on http://localhost:${port}`);
-  console.log('PUT /tasks (array) — replace list; PATCH /tasks/:id — update task');
+  // console.log('PUT /tasks (array) — replace list; PATCH /tasks/:id — update task');
 });
