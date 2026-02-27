@@ -1,0 +1,139 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "name": "Монтаж рекламного ролика",
+      "projectId": 1,
+      "workType": "editing",
+      "assignees": [
+        1,
+        4
+      ],
+      "plannedHours": 16,
+      "actualHours": 6,
+      "status": "in_progress",
+      "startDate": "2024-03-01",
+      "endDate": "2024-03-05",
+      "description": "Сделать нарезку исходников",
+      "order": 2
+    },
+    {
+      "id": 2,
+      "name": "Цветокоррекция клипа",
+      "projectId": 2,
+      "workType": "graphics",
+      "assignees": [
+        3
+      ],
+      "plannedHours": 4,
+      "actualHours": 0,
+      "status": "in_progress",
+      "startDate": "2026-01-15",
+      "endDate": "2026-03-12",
+      "description": "Привести цвета в единую гамму",
+      "order": 3
+    },
+    {
+      "id": "4",
+      "name": "Звукозапись сингла",
+      "projectId": 2,
+      "workType": "sound",
+      "assignees": [
+        3,
+        1
+      ],
+      "plannedHours": 5,
+      "actualHours": 5,
+      "status": "completed",
+      "startDate": "2024-06-12",
+      "endDate": "2026-03-12",
+      "description": "Записать сингл",
+      "order": 5
+    },
+    {
+      "id": 3,
+      "name": "Разработка CRM-системы",
+      "projectId": 2,
+      "workType": "color",
+      "assignees": [
+        1,
+        2,
+        3
+      ],
+      "plannedHours": 21,
+      "actualHours": 2,
+      "status": "not_started",
+      "startDate": "2026-05-11",
+      "endDate": "2026-09-12",
+      "description": "Создать дизайн-систему и базовую бизнес-логику",
+      "order": 1
+    },
+    {
+      "name": "Написать канбан доску",
+      "projectId": 3,
+      "workType": "editing",
+      "assignees": [],
+      "plannedHours": 10,
+      "actualHours": 0,
+      "status": "on_hold",
+      "startDate": "2026-02-06",
+      "endDate": "2026-02-27",
+      "description": "1",
+      "id": 1772198923831,
+      "order": 4
+    },
+    {
+      "name": "1",
+      "projectId": 2,
+      "workType": "graphics",
+      "assignees": [
+        1
+      ],
+      "plannedHours": 1,
+      "actualHours": 0,
+      "status": "not_started",
+      "startDate": "2026-01-30",
+      "endDate": "2026-02-19",
+      "description": "1",
+      "id": 1772209754652,
+      "order": 1
+    }
+  ],
+  "projects": [
+    {
+      "id": "1",
+      "name": "Рекламный ролик Nike",
+      "code": "NIKE-2024"
+    },
+    {
+      "id": "2",
+      "name": "Клип 'Лето'",
+      "code": "MUSIC-001"
+    }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "name": "Анна Петрова",
+      "role": "Монтажер"
+    },
+    {
+      "id": "2",
+      "name": "Иван Сидоров",
+      "role": "Колорист"
+    },
+    {
+      "id": "3",
+      "name": "Мария Иванова",
+      "role": "Звукорежиссер"
+    }
+  ],
+  "filters": {
+    "statuses": [],
+    "search": "",
+    "workType": [],
+    "assigneeId": [],
+    "sortBy": "order",
+    "sortOrder": "asc"
+  }
+}
