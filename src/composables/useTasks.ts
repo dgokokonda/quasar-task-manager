@@ -4,7 +4,7 @@ import type { TaskStatus } from '@/types';
 
 export function useTasks() {
   const store = useTaskStore();
-  const { tasks, loading, filteredTasks, filters } = storeToRefs(store);
+  const { tasks, loading, filters } = storeToRefs(store);
 
   const getTaskByStatus = (status: TaskStatus) =>
     tasks.value.filter((item) => item.status === status);
@@ -13,7 +13,6 @@ export function useTasks() {
     tasks,
     loading,
     filters,
-    filteredTasks,
     fetchTasks: store.fetchTasks,
     createTask: store.createTask,
     updateTask: store.updateTask,
@@ -23,5 +22,6 @@ export function useTasks() {
     updateTasks: store.updateTasks,
     updateFilters: store.updateFilters,
     resetFilters: store.resetFilters,
+    getFilters: store.getFilters,
   };
 }

@@ -10,7 +10,8 @@ export function useTaskPage() {
     deleteTask,
     updateTaskStatus,
     filters,
-    filteredTasks,
+    tasks,
+    getFilters,
     resetFilters,
     updateFilters,
   } = useTasks();
@@ -22,6 +23,7 @@ export function useTaskPage() {
   const taskToDelete = ref<Task | null>(null);
 
   onMounted(async () => {
+    await getFilters();
     await fetchTasks();
   });
 
@@ -35,9 +37,6 @@ export function useTaskPage() {
     showFormDialog.value = true;
   };
 
-  // const applyFilters = () => {
-  //   updateFilters(localFilters.value);
-  // };
   const openEditDialog = (row: Task) => {
     showFormDialog.value = true;
     selectedTask.value = row;
@@ -84,7 +83,7 @@ export function useTaskPage() {
     selectedTask,
     taskToDelete,
     filters,
-    filteredTasks,
+    tasks,
 
     openEditDialog,
     confirmDelete,

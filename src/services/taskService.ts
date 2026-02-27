@@ -1,13 +1,11 @@
 import { apiService } from './api';
-import type { Task } from '@/types';
+import type { Task, TaskFiltersType } from '@/types';
 
 // Параметры для постраничной загрузки (для будущей пагинации).
 // json-server: GET /tasks?_page=1&_limit=20
 export interface GetTasksParams {
   page?: number;
   limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
 }
 
 // Элемент дельты порядка: только id и новый order (индекс)
@@ -21,8 +19,6 @@ export const taskService = {
     const search = new URLSearchParams();
     if (params?.page != null) search.set('_page', String(params.page));
     if (params?.limit != null) search.set('_limit', String(params.limit));
-    if (params?.sortBy != null) search.set('_sort', params.sortBy);
-    if (params?.sortOrder != null) search.set('_order', params.sortOrder);
     const query = search.toString();
     const url = query ? `/tasks?${query}` : '/tasks';
     return apiService.get<Task[]>(url);
@@ -55,5 +51,11 @@ export const taskService = {
   async updateTasksOrderDelta(orders: OrderDeltaItem[]): Promise<void> {
     if (orders.length === 0) return;
     await apiService.patch('/tasks/order', { orders });
+  },
+  async getFilters(): Promise<TaskFiltersType> {
+    return await apiService.get<TaskFiltersType>('/filters');
+  },
+  async applyFilters(newFilters: Partial<TaskFiltersType>): Promise<TaskFiltersType> {
+    return await apiService.put<TaskFiltersType>('/filters/apply', newFilters);
   },
 };
