@@ -8,7 +8,7 @@
       </q-card-section>
 
       <q-card-section>
-        <q-form @submit="onSubmit" class="q-gutter-md">
+        <q-form @submit="onSubmit">
           <q-input
             v-model="form.name"
             label="Название задачи *"
@@ -47,6 +47,18 @@
             multiple
             outlined
             use-chips
+            emit-value
+            map-options
+          />
+
+          <q-select
+            v-model="form.priority"
+            :options="priorities"
+            option-value="id"
+            option-label="name"
+            label="Приоритет"
+            :rules="[(val) => !!val || 'Выберите приоритет']"
+            outlined
             emit-value
             map-options
           />
@@ -105,7 +117,7 @@
 
           <q-input v-model="form.description" label="Описание" type="textarea" outlined autogrow />
 
-          <div class="row justify-end q-gutter-sm">
+          <div class="row justify-end q-gutter-sm q-pt-md">
             <q-btn label="Отмена" color="grey" v-close-popup />
             <q-btn
               :label="isEditing ? 'Сохранить' : 'Создать'"
@@ -135,7 +147,7 @@ const emit = defineEmits<{
   (e: 'save', task: Omit<Task, 'id'> | Partial<Task>): void;
 }>();
 
-const { projects, users, workTypeOptions, statusOptions } = useTaskFormOptions();
+const { projects, priorities, users, workTypeOptions, statusOptions } = useTaskFormOptions();
 
 const showDialog = computed({
   get: () => props.modelValue,
@@ -155,6 +167,7 @@ const form = ref({
   startDate: '',
   endDate: '',
   description: '',
+  priority: '',
 });
 
 const submitting = ref(false);
@@ -171,6 +184,7 @@ const resetForm = () => {
     startDate: '',
     endDate: '',
     description: '',
+    priority: '',
   };
 };
 
@@ -203,6 +217,7 @@ watch(
         startDate: task.startDate,
         endDate: task.endDate,
         description: task.description || '',
+        priority: task.priority || '',
       };
     } else {
       resetForm();

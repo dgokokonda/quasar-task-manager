@@ -5,13 +5,15 @@ import { writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+const ENTRIES_AMOUNT = 1001;
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const outPath = join(__dirname, 'db-1001.json');
+const outPath = join(__dirname, `db-${ENTRIES_AMOUNT}.json`);
 
 const WORK_TYPES = ['editing', 'color', 'graphics', 'sound'];
 const STATUSES = ['not_started', 'in_progress', 'on_hold', 'completed'];
 const PROJECT_IDS = [1, 2];
 const ASSIGNEE_POOL = [[1], [2], [3], [1, 2], [2, 3], [1, 3], [1, 2, 3]];
+const PRIORITIES = ['low', 'medium', 'high'];
 
 const names = [
   'Монтаж рекламного ролика', 'Цветокоррекция клипа', 'Звукозапись сингла', 'Разработка CRM-системы',
@@ -34,8 +36,12 @@ function randomDate(startYear, endYear) {
   return `${y}-${m}-${d}`;
 }
 
+function randomPriority() {
+  return randomItem(PRIORITIES);
+}
+
 const tasks = [];
-for (let i = 1; i <= 1001; i++) {
+for (let i = 1; i <= ENTRIES_AMOUNT; i++) {
   const start = randomDate(2023, 2026);
   const end = randomDate(2024, 2027);
   tasks.push({
@@ -51,6 +57,7 @@ for (let i = 1; i <= 1001; i++) {
     endDate: end > start ? end : start,
     description: `Описание задачи ${i}.`,
     order: i - 1,
+    priority: randomPriority(),
   });
 }
 
@@ -65,6 +72,28 @@ const db = {
     { id: '2', name: 'Иван Сидоров', role: 'Колорист' },
     { id: '3', name: 'Мария Иванова', role: 'Звукорежиссер' },
   ],
+  filters: {
+    statuses: [],
+    search: "",
+    workType: [],
+    assigneeId: [],
+    dateFrom: "",
+    dateTo: "",
+    endDateFrom: "",
+    endDateTo: "",
+    hoursMin: 0,
+    hoursMax: 0,
+    sortBy: "order",
+    sortOrder: "asc"
+  },
+  pageData: {
+    page: 1,
+    limit: 50,
+    next: true,
+    prev: false,
+    total: Math.ceil(ENTRIES_AMOUNT / 50),
+    totalEntries: ENTRIES_AMOUNT
+  }
 };
 
 writeFileSync(outPath, JSON.stringify(db, null, 2), 'utf8');

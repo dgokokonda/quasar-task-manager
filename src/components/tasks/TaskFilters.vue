@@ -206,6 +206,7 @@ const sortByOptions = Object.entries({
   endDate: 'Дата окончания',
   plannedHours: 'Плановые часы',
   actualHours: 'Фактические часы',
+  priority: 'Приоритет',
   order: 'Порядок',
 }).map(([value, label]) => ({
   id: value as WorkType,

@@ -32,6 +32,7 @@
             <td class="q-table__td">
               <q-icon name="drag_handle" class="drag-handle q-mr-sm" />
             </td>
+            <td class="q-table__td">{{ row.id }}</td>
             <td class="q-table__td" @click="toDetailPage(row.id)">{{ row.name }}</td>
             <td class="q-table__td">{{ getProjectName(row.projectId) }}</td>
             <td class="q-table__td">{{ WORK_TYPE_LABELS[row.workType as WorkType] }}</td>
@@ -54,6 +55,11 @@
             <td class="q-table__td text-center">
               <q-badge :color="STATUS_COLORS[row.status as TaskStatus]">
                 {{ STATUS_LABELS[row.status as TaskStatus] }}
+              </q-badge>
+            </td>
+            <td class="q-table__td text-center">
+              <q-badge :color="PRIORITY_COLORS[row.priority as TaskPriority]">
+                {{ PRIORITY_LABELS[row.priority as TaskPriority] }}
               </q-badge>
             </td>
             <td class="q-table__td text-center">
@@ -83,8 +89,14 @@ import { useTaskTable } from '@/composables/useTaskTable';
 import type { OrderDeltaItem } from '@/services/taskService';
 import draggableComponent from 'vuedraggable';
 import { ref, watch } from 'vue';
-import type { Task, TaskStatus, WorkType } from '@/types';
-import { STATUS_COLORS, STATUS_LABELS, WORK_TYPE_LABELS } from '@/types';
+import type { Task, TaskStatus, WorkType, TaskPriority } from '@/types';
+import {
+  STATUS_COLORS,
+  STATUS_LABELS,
+  WORK_TYPE_LABELS,
+  PRIORITY_COLORS,
+  PRIORITY_LABELS,
+} from '@/types';
 import { useRouter } from 'vue-router';
 
 interface Props {

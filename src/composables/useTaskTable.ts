@@ -22,6 +22,13 @@ export function useTaskTable() {
 
   const columns: TaskTableColumn[] = [
     {
+      name: 'id',
+      label: 'ID задачи',
+      field: 'id',
+      align: 'left' as const,
+      sortable: false,
+    },
+    {
       name: 'name',
       label: 'Название задачи',
       field: 'name',
@@ -63,6 +70,13 @@ export function useTaskTable() {
       label: 'Статус',
       field: 'status',
       align: 'center' as const,
+      sortable: true,
+    },
+    {
+      name: 'priority',
+      label: 'Приоритет',
+      field: 'priority',
+      align: 'left' as const,
       sortable: true,
     },
     {

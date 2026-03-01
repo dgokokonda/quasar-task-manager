@@ -1,5 +1,6 @@
 export type WorkType = 'editing' | 'color' | 'graphics' | 'sound';
 export type TaskStatus = 'not_started' | 'in_progress' | 'on_hold' | 'completed';
+export type TaskPriority = 'low' | 'medium' | 'high';
 
 export interface Task {
   id: number;
@@ -13,6 +14,7 @@ export interface Task {
   startDate: string;
   endDate: string;
   description?: string;
+  priority?: string;
   // Порядок в табличном списке для отображения после drag-drop задачи:
   order?: number;
 }
@@ -71,6 +73,18 @@ export const STATUS_LABELS: Record<TaskStatus, string> = {
   in_progress: 'В работе',
   on_hold: 'На паузе',
   completed: 'Завершена',
+};
+
+export const PRIORITY_COLORS: Record<TaskPriority, string> = {
+  low: 'grey',
+  medium: 'orange',
+  high: 'red',
+};
+
+export const PRIORITY_LABELS: Record<TaskPriority, string> = {
+  low: 'Низкий',
+  medium: 'Средний',
+  high: 'Высокий',
 };
 
 export const WORK_TYPE_LABELS: Record<WorkType, string> = {

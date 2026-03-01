@@ -1,10 +1,16 @@
-import type { WorkType, TaskStatus, Project, User } from '@/types';
+import type { WorkType, TaskStatus, Project, User, TaskPriority } from '@/types';
 
 export const WORK_TYPE_LABELS: Record<WorkType, string> = {
   editing: 'Монтаж',
   color: 'Цветокоррекция',
   graphics: 'Графика',
   sound: 'Звук',
+};
+
+export const PRIORITY_LABELS: Record<TaskPriority, string> = {
+  low: 'Низкий',
+  medium: 'Средний',
+  high: 'Высокий',
 };
 
 export const STATUS_LABELS: Record<TaskStatus, string> = {

@@ -2,7 +2,7 @@
   "name": "quasar-task-manager",
   "version": "0.0.1",
   "description": "A Quasar Project",
-  "productName": "Quasar Task Manager",
+  "productName": "PostProduction Planner",
   "author": "dgokokonda",
   "private": true,
   "scripts": {
