@@ -8,16 +8,25 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/tasks',
+    name: 'tasks',
     component: () => import('@/layouts/MainLayout.vue'),
     children: [{ path: '', component: () => import('@/pages/TasksPage.vue') }],
   },
   {
+    path: '/tasks/:id',
+    name: 'task',
+    component: () => import('@/layouts/MainLayout.vue'),
+    children: [{ path: '', component: () => import('@/pages/TaskDetailPage.vue') }],
+  },
+  {
     path: '/projects',
+    name: 'projects',
     component: () => import('@/layouts/MainLayout.vue'),
     children: [{ path: '', component: () => import('@/pages/ProjectsPage.vue') }],
   },
   {
     path: '/reports',
+    name: 'reports',
     component: () => import('@/layouts/MainLayout.vue'),
     children: [{ path: '', component: () => import('@/pages/ReportsPage.vue') }],
   },

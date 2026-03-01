@@ -3,6 +3,7 @@ import type { Task, TaskStatus } from '@/types';
 import { STATUS_COLORS, STATUS_LABELS } from '@/types';
 import { MOCK_USERS, KANBAN_COLUMN_HEIGHT } from '@/utils/constants';
 import type { OrderDeltaItem } from '@/services/taskService';
+import { useRouter } from 'vue-router';
 
 type KanbanUpdateEvent = (delta: OrderDeltaItem[], tasks: Task[]) => void;
 type KanbanUpdateStatusEvent = (id: number, task: Task) => void;
@@ -12,6 +13,8 @@ export function useTaskKanban(
   emitUpdate: KanbanUpdateEvent,
   emitUpdateStatus: KanbanUpdateStatusEvent,
 ) {
+  const router = useRouter();
+
   const STATUSES: TaskStatus[] = Object.keys(STATUS_LABELS) as TaskStatus[];
   const columnHeight = ref(KANBAN_COLUMN_HEIGHT);
 
@@ -26,6 +29,7 @@ export function useTaskKanban(
     completed: [],
   });
   const columnTasks = (status: TaskStatus): Task[] => columns.value[status] ?? [];
+  const toDetailPage = (id: number) => router.push({ path: '/tasks/' + id });
 
   function setTasksByColumnStatus() {
     const list = props.tasks ?? [];
@@ -182,5 +186,6 @@ export function useTaskKanban(
     setColumn,
     getUserName,
     getUserInitials,
+    toDetailPage,
   };
 }
