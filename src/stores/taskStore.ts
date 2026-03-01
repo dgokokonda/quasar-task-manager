@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { taskService, type OrderDeltaItem } from '@/services/taskService';
+import { type PageDataType, taskService, type OrderDeltaItem } from '@/services/taskService';
 import type { Task, TaskFiltersType } from '@/types';
 import { useQuasar } from 'quasar';
 
@@ -18,14 +18,30 @@ export const useTaskStore = defineStore('tasks', () => {
     sortBy: 'order',
     sortOrder: 'asc',
   });
+  const pagination = ref<PageDataType>({
+    page: 1,
+    limit: 20,
+    prev: false,
+    next: false,
+    total: 0,
+    totalEntries: 0,
+  });
 
   async function fetchTasks() {
     loading.value = true;
     error.value = null;
     try {
-      const response = await taskService.getTasks();
-      if (response) {
-        tasks.value = response.map((t, i) => ({ ...t, order: t.order ?? i }));
+      const params = {
+        page: pagination.value.page,
+        limit: pagination.value.limit,
+      };
+
+      const { data, pageData } = await taskService.getTasks(params);
+      if (data) {
+        tasks.value = data.map((t, i) => ({ ...t, order: t.order ?? i }));
+      }
+      if (pageData) {
+        pagination.value = pageData;
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch tasks';
@@ -175,11 +191,20 @@ export const useTaskStore = defineStore('tasks', () => {
     }
   }
 
+  function setPage(value: number) {
+    if (pagination.value.page !== value) pagination.value.page = value;
+  }
+
+  function setPageLimit(value: number) {
+    if (pagination.value.limit !== value) pagination.value.limit = value;
+  }
+
   return {
     tasks,
     loading,
     error,
     filters,
+    pagination,
     fetchTasks,
     createTask,
     updateTask,
@@ -188,5 +213,7 @@ export const useTaskStore = defineStore('tasks', () => {
     resetFilters,
     updateTasks,
     getFilters,
+    setPage,
+    setPageLimit,
   };
 });

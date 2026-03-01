@@ -29,7 +29,11 @@ const jsonServerApp = createApp(db, { static: [] });
 
 function pathname(req) {
   const u = req.url ?? req.originalUrl ?? '';
-  return String(u).split('?')[0].replace(/^\/api/, '') || '/';
+  return (
+    String(u)
+      .split('?')[0]
+      .replace(/^\/api/, '') || '/'
+  );
 }
 
 function readBody(req) {
@@ -110,22 +114,45 @@ app.use((req, res, next) => {
 });
 
 // GET /tasks — отдаём список из db сами (надёжно при любом порядке middleware).
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   if (req.method !== 'GET') return next();
   const path = pathname(req);
 
   if (path !== '/tasks') return next();
   const tasks = db.data?.tasks;
-  const filters = db.data?.filters
+  const filters = db.data?.filters;
   if (!Array.isArray(tasks)) {
     return res.status(500).json({ error: 'tasks not array' });
   }
-  // const queryString = (req.url ?? '').split('?')[1] ?? '';
-  // const params = new URLSearchParams(queryString);
-  // const page = params.get('_page') || 0;
-  // const limit = params.get('_limit') || 20;
+  const queryString = (req.url ?? '').split('?')[1] ?? '';
+  const params = new URLSearchParams(queryString);
+
+  const page = parseInt(params.get('_page') || '1', 10);
+  const limit = parseInt(params.get('_limit') || '20', 10);
+  const validPage = Math.max(1, page);
+  const validLimit = Math.max(1, Math.min(100, limit));
+
+  const from = (validPage - 1) * validLimit;
+  const to = from + validLimit;
+
   const result = filteredTasks(filters, tasks);
-  return res.json(result);
+  const totalPages = Math.max(1, Math.ceil(result.length / validLimit));
+
+  const currentPage = Math.min(validPage, totalPages);
+  const adjustedFrom = (currentPage - 1) * validLimit;
+
+  const pageData = {
+    page: currentPage,
+    limit: validLimit,
+    next: currentPage < totalPages,
+    prev: currentPage > 1,
+    total: totalPages,
+    totalEntries: result.length,
+  };
+
+  db.data.pageData = pageData;
+  await db.write();
+  return res.json({ data: result.slice(from, from + limit), pageData });
 });
 
 // GET /tasks/:id — одна задача.
@@ -153,7 +180,8 @@ app.use(async (req, res, next) => {
   const isPostTask = req.method === 'POST' && path === '/tasks';
   const isPutFilters = req.method === 'PUT' && path === '/filters/apply';
 
-  if (!isPutTasks && !isPatchOrder && !isPatchTask && !isDeleteTask && !isPostTask && !isPutFilters) return next();
+  if (!isPutTasks && !isPatchOrder && !isPatchTask && !isDeleteTask && !isPostTask && !isPutFilters)
+    return next();
 
   let body;
   try {
@@ -216,11 +244,10 @@ app.use(async (req, res, next) => {
       return res.status(404).json({ error: 'Task not found' });
     }
 
-    const updated = db.data.tasks.filter(t => +t.id !== id);
+    const updated = db.data.tasks.filter((t) => +t.id !== id);
     db.data.tasks = updated;
     await db.write();
     return res.json(updated);
-
   }
 
   if (isPostTask) {
@@ -244,7 +271,7 @@ app.use(async (req, res, next) => {
       return res.status(500).json({ error: 'invalid data' });
     }
 
-    db.data.filters = { ...body }
+    db.data.filters = { ...body };
     await db.write();
     return res.json(db.data.filters);
   }

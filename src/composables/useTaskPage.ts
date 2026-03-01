@@ -1,8 +1,11 @@
 import { onMounted, ref, watch } from 'vue';
 import { useTasks } from '@/composables/useTasks';
 import type { Task, TaskStatus } from '@/types';
+import { useRoute } from 'vue-router';
 
 export function useTaskPage() {
+  const route = useRoute();
+
   const {
     fetchTasks,
     createTask,
@@ -11,9 +14,12 @@ export function useTaskPage() {
     updateTaskStatus,
     filters,
     tasks,
+    pagination,
     getFilters,
     resetFilters,
     updateFilters,
+    setPage,
+    setPageLimit,
   } = useTasks();
 
   const viewMode = ref<'table' | 'kanban'>('table');
@@ -23,6 +29,17 @@ export function useTaskPage() {
   const taskToDelete = ref<Task | null>(null);
 
   onMounted(async () => {
+    const page = Number(route.query.page) || 1;
+    const limit = Number(route.query.limit) || 20;
+
+    if (page !== pagination.value.page) {
+      setPage(page);
+    }
+
+    if (limit !== pagination.value.limit) {
+      setPageLimit(limit);
+    }
+
     await getFilters();
     await fetchTasks();
   });
