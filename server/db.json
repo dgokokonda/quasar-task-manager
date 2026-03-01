@@ -48,7 +48,7 @@
       "status": "on_hold",
       "startDate": "2024-07-11",
       "endDate": "2024-07-11",
-      "description": "Описание задачи 3.",
+      "description": "Описание задачи 3",
       "order": 2
     },
     {
@@ -16778,5 +16778,13 @@
     "assigneeId": [],
     "sortBy": "order",
     "sortOrder": "asc"
+  },
+  "pageData": {
+    "page": 0,
+    "limit": 20,
+    "next": true,
+    "prev": false,
+    "total": 50,
+    "totalEntries": 0
   }
 }

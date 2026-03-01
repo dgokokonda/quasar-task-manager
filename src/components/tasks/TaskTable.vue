@@ -32,7 +32,7 @@
             <td class="q-table__td">
               <q-icon name="drag_handle" class="drag-handle q-mr-sm" />
             </td>
-            <td class="q-table__td">{{ row.name }}</td>
+            <td class="q-table__td" @click="toDetailPage(row.id)">{{ row.name }}</td>
             <td class="q-table__td">{{ getProjectName(row.projectId) }}</td>
             <td class="q-table__td">{{ WORK_TYPE_LABELS[row.workType as WorkType] }}</td>
             <td class="q-table__td">
@@ -85,6 +85,8 @@ import draggableComponent from 'vuedraggable';
 import { ref, watch } from 'vue';
 import type { Task, TaskStatus, WorkType } from '@/types';
 import { STATUS_COLORS, STATUS_LABELS, WORK_TYPE_LABELS } from '@/types';
+import { useRouter } from 'vue-router';
+
 interface Props {
   tasks: Task[];
   loading: boolean;
@@ -102,6 +104,7 @@ const emit = defineEmits<{
   (e: 'delete', task: Task): void;
   (e: 'update', delta: OrderDeltaItem[], tasks: Task[]): void;
 }>();
+const router = useRouter();
 
 const { columns, getUserInitials, getUserName, getProjectName, formatDate } = useTaskTable();
 
@@ -127,6 +130,8 @@ const onDragEnd = (evt: DragEndEvt) => {
   }));
   emit('update', deltaOrder, draggableTasks.value);
 };
+
+const toDetailPage = (id: number) => router.push({ path: '/tasks/' + id });
 </script>
 <style scoped lang="scss">
 tfoot.empty div {

@@ -14,14 +14,31 @@ export interface OrderDeltaItem {
   order: number;
 }
 
+export interface PageDataType {
+  page: number;
+  limit: number;
+  total: number;
+  next: boolean;
+  prev: boolean;
+  totalEntries: number;
+}
+
+interface GetTasksResponseType {
+  data: Task[];
+  pageData: PageDataType;
+}
+
 export const taskService = {
-  async getTasks(params?: GetTasksParams): Promise<Task[]> {
+  async getTasks(params?: GetTasksParams): Promise<GetTasksResponseType> {
     const search = new URLSearchParams();
+
     if (params?.page != null) search.set('_page', String(params.page));
     if (params?.limit != null) search.set('_limit', String(params.limit));
+
     const query = search.toString();
     const url = query ? `/tasks?${query}` : '/tasks';
-    return apiService.get<Task[]>(url);
+
+    return apiService.get<GetTasksResponseType>(url);
   },
 
   /** GET /tasks/:id — одна задача по id */

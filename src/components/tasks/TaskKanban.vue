@@ -27,7 +27,10 @@
                 @click="emit('edit', task)"
               >
                 <q-card-section class="q-py-sm">
-                  <div class="text-body2 text-weight-medium ellipsis-2">
+                  <div
+                    class="text-body2 text-weight-medium ellipsis-2 cursor-pointer"
+                    @click.stop="toDetailPage(task.id)"
+                  >
                     {{ task.name }}
                   </div>
                   <div class="row items-center q-mt-xs">
@@ -92,6 +95,7 @@ const {
   setColumn,
   getUserName,
   getUserInitials,
+  toDetailPage,
 } = useTaskKanban(
   props,
   (delta, tasks) => emit('update', delta, tasks),
@@ -131,9 +135,5 @@ const {
 
 .kanban-list .q-card {
   cursor: grab;
-}
-
-.kanban-list .q-card .text-body2 {
-  cursor: text;
 }
 </style>

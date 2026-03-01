@@ -38,6 +38,7 @@
     </div>
 
     <template v-else>
+      <TaskPagination v-if="tasks.length > 0" key="0" />
       <TaskTable
         v-if="viewMode === 'table'"
         :tasks="tasks"
@@ -57,6 +58,7 @@
         @update="updateTasks"
         @update-status="updateTask"
       />
+      <TaskPagination v-if="tasks.length > 0" key="1" />
     </template>
   </q-page>
 
@@ -75,6 +77,7 @@ import { ref, watch } from 'vue';
 import type { TaskFiltersType } from '@/types';
 import { useTasks } from '@/composables/useTasks';
 import { useTaskPage } from '@/composables/useTaskPage';
+import TaskPagination from '@/components/tasks/TaskPagination.vue';
 import TaskTable from '@/components/tasks/TaskTable.vue';
 import TaskKanban from '@/components/tasks/TaskKanban.vue';
 import TaskForm from '@/components/tasks/TaskForm.vue';
