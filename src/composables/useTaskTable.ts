@@ -1,7 +1,7 @@
 import type { TaskTableColumn } from '@/types/table';
 import type { Task } from '@/types';
 import { WORK_TYPE_LABELS } from '@/types';
-import { MOCK_USERS } from '@/utils/constants';
+import { MOCK_USERS, MOCK_PROJECTS } from '@/utils/constants';
 
 export function useTaskTable() {
   const getUserInitials = (userId: number) => {
@@ -100,13 +100,8 @@ export function useTaskTable() {
   ];
 
   const getProjectName = (projectId: number): string => {
-    const projects: Record<number, string> = {
-      1: 'Рекламный ролик Nike',
-      2: 'Клип "Лето"',
-      3: 'Корпоративный фильм',
-      4: 'Сериал "Город"',
-    };
-    return projects[projectId] || `Проект ${projectId}`;
+    const project = MOCK_PROJECTS.find((p) => p.id === projectId);
+    return project?.name || `Проект ${projectId}`;
   };
 
   const formatDate = (date: string): string => {

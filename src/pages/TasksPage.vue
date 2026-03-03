@@ -5,6 +5,24 @@
         <div class="text-h5">Управление задачами</div>
       </div>
       <div class="col-auto">
+        <q-btn
+          flat
+          color="primary"
+          icon="download"
+          label="CSV"
+          title="Экспорт списка задач в CSV"
+          @click="exportCSV"
+          :disable="!tasks.length"
+        />
+        <q-btn
+          flat
+          color="primary"
+          icon="download"
+          label="Excel"
+          title="Экспорт списка задач в Excel"
+          @click="exportExcel"
+          :disable="!tasks.length"
+        />
         <q-btn label="Новая задача" icon="add" color="primary" @click="showCreateDialog" />
       </div>
     </div>
@@ -102,6 +120,8 @@ const {
   handleTaskSave,
   handleDeleteConfirm,
   handleStatusChange,
+  exportCSV,
+  exportExcel,
 } = useTaskPage();
 
 const localFilters = ref<TaskFiltersType>(filters.value);
