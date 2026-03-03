@@ -20,6 +20,8 @@ PostProduction Planner — модуль системы планирования 
 - ✅ CRUD операции (создание, редактирование, удаление)
 - ✅ Изменение статуса через drag & drop в таблице и канбан-доске
 - ✅ Пагинация и синхронизация с URL параметрами
+- ✅ Экспорт списка задач в CSV/Excel
+- ✅ График распределения задач по дням
 
 ## Установка и запуск
 
@@ -67,6 +69,9 @@ npm run preview
 | **Vuedraggable**          | 4.x    | Реализация drag-and-drop         |
 | **JSON Server**           | 1.x    | Моковый сервер                   |
 | **SCSS**                  | latest | Препроцессор для стилей          |
+| **echarts & vue-echarts** | latest | Библиотека графиков              |
+| **papaparse**             | 5.x    | Библиотека экспорта в xls/csv    |
+| **date-fns**              | 4.x    | Библиотека для работы с датами   |
 
 ## Структура проекта
 
@@ -78,6 +83,7 @@ src/
 │ │ ├── TaskKanban.vue
 │ │ ├── TaskForm.vue
 │ │ ├── TaskPagination.vue
+│ │ ├── TaskChart.vue
 │ │ └── TaskFilters.vue
 │ └── common/ # Переиспользуемые компоненты
 │
@@ -85,11 +91,16 @@ src/
 │ ├── useTasks.ts
 │ ├── useTaskTable.ts
 │ ├── useTaskPage.ts
-│ ├── useKanbanBoard.ts
+│ ├── useTaskKanban.ts
 │ ├── useTaskDetail.ts
+│ ├── useExport.ts
+│ ├── useTaskChart.ts
+│ ├── useTaskFormOptions.ts
 │ └── usePagination.ts
 │
 ├── stores/ # Pinia store
+│ ├── projectStore.ts
+│ ├── userStore.ts
 │ └── taskStore.ts
 │
 ├── services/ # API сервисы
@@ -99,6 +110,9 @@ src/
 ├── types/ # TypeScript интерфейсы
 │ ├── index.ts
 │ └── table.ts
+│
+├── layouts/ # Лэйауты
+│ └── MainLayout.vue
 │
 ├── router/ # Маршрутизация
 │ ├── index.ts
@@ -111,7 +125,10 @@ src/
 │ ├── ReportsPage.vue
 │ └── ErrorNotFound.vue
 │
+├── boots/ # Интеграции библиотеки в Quasar (echarts, pinia)
+│
 └── utils/ # Утилиты и константы
+├── helpers.ts
 └── constants.ts
 ```
 
@@ -256,10 +273,10 @@ GET /api/tasks?\_limit=1000
 1. **Канбан-доска с drag & drop ✅.**
    Реализована доска с колонками по статусам, возможность перетаскивать задачи между колонками и менять порядок внутри колонки. Используется vuedraggable с вычислением дельты изменений.
 
-2. **График распределения задач по дням.**
+2. **График распределения задач по дням ✅.**
    График распределения задач по дням реализован с использованием eCharts. Доступен выбор отображения задач по периоду и типу даты (дата начала/ дата конца/ активная дата).
 
-3. **Экспорт списка задач в CSV.**
+3. **Экспорт списка задач в CSV ✅.**
    Реализован экспорт списка задач в форматах .csv и .xls с использованием библиотеки papaparse. Экспорт осуществляется по основным полям задач (id, name, projectId, workType, assignees, status, plannedHours, actualHours, startDate, endDate, description, priority).
 
 ## Использованные ИИ-инструменты
