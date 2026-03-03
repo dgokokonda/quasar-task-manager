@@ -26,6 +26,7 @@
         :options="[
           { label: 'Таблица', value: 'table' },
           { label: 'Канбан', value: 'kanban' },
+          { label: 'График', value: 'chart' },
         ]"
         toggle-color="primary"
         unelevated
@@ -50,7 +51,7 @@
       />
 
       <TaskKanban
-        v-else
+        v-else-if="viewMode === 'kanban'"
         :tasks="tasks"
         @status-change="handleStatusChange"
         @edit="openEditDialog"
@@ -58,6 +59,7 @@
         @update="updateTasks"
         @update-status="updateTask"
       />
+      <TaskChart :tasks="tasks" :loading="loading" v-else />
       <TaskPagination v-if="tasks.length > 0" key="1" />
     </template>
   </q-page>
@@ -80,6 +82,7 @@ import { useTaskPage } from '@/composables/useTaskPage';
 import TaskPagination from '@/components/tasks/TaskPagination.vue';
 import TaskTable from '@/components/tasks/TaskTable.vue';
 import TaskKanban from '@/components/tasks/TaskKanban.vue';
+import TaskChart from '@/components/tasks/TaskChart.vue';
 import TaskForm from '@/components/tasks/TaskForm.vue';
 import TaskFilters from '@/components/tasks/TaskFilters.vue';
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue';

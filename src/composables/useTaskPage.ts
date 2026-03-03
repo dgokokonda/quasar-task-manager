@@ -22,7 +22,7 @@ export function useTaskPage() {
     setPageLimit,
   } = useTasks();
 
-  const viewMode = ref<'table' | 'kanban'>('table');
+  const viewMode = ref<'table' | 'kanban' | 'chart'>('table');
   const showFormDialog = ref(false);
   const showConfirmDialog = ref(false);
   const selectedTask = ref<Task | null>(null);
