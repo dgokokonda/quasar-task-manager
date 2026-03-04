@@ -55,6 +55,12 @@ export function useTaskDetail() {
       : '?';
   }
 
+  const getUserName = (userId: number) => {
+    const user = MOCK_USERS.find((u) => u.id === userId);
+    if (!user) return '';
+    return user.name;
+  };
+
   function confirmDelete() {
     showConfirmDialog.value = true;
   }
@@ -81,6 +87,7 @@ export function useTaskDetail() {
     confirmDelete,
     formatDate,
     getUserInitials,
+    getUserName,
     showConfirmDialog,
     handleDeleteConfirm,
     handleTaskSave,

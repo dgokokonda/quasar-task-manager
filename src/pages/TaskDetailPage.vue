@@ -18,54 +18,26 @@
           <span class="text-h5 q-ml-sm">{{ task.name }}</span>
         </div>
         <div class="col-auto">
-          <q-btn
+          <UIButton
             flat
             color="primary"
             label="Редактировать"
             icon="edit"
             @click="showFormDialog = true"
           />
-          <q-btn flat color="negative" label="Удалить" icon="delete" @click="confirmDelete" />
+          <UIButton flat color="negative" label="Удалить" icon="delete" @click="confirmDelete" />
         </div>
       </div>
 
-      <q-card flat bordered class="q-pa-md">
-        <q-card-section class="row q-col-gutter-md">
-          <div class="col-12 col-md-6">
-            <div class="text-caption text-grey-7">Статус</div>
-            <q-badge :color="STATUS_COLORS[task.status]">{{ STATUS_LABELS[task.status] }}</q-badge>
-          </div>
-          <div class="col-12 col-md-6">
-            <div class="text-caption text-grey-7">Тип работы</div>
-            <span>{{ WORK_TYPE_LABELS[task.workType] }}</span>
-          </div>
-          <div class="col-12 col-md-6">
-            <div class="text-caption text-grey-7">Часы (факт / план)</div>
-            <span>{{ task.actualHours }} / {{ task.plannedHours }}</span>
-          </div>
-          <div class="col-12 col-md-6">
-            <div class="text-caption text-grey-7">Сроки</div>
-            <span>{{ formatDate(task.startDate) }} — {{ formatDate(task.endDate) }}</span>
-          </div>
-          <div class="col-12">
-            <div class="text-caption text-grey-7">Исполнители</div>
-            <q-avatar
-              v-for="uid in task.assignees"
-              :key="uid"
-              size="32px"
-              class="q-mr-xs"
-              color="primary"
-              text-color="white"
-            >
-              {{ getUserInitials(uid) }}
-            </q-avatar>
-          </div>
-          <div v-if="task.description" class="col-12">
-            <div class="text-caption text-grey-7">Описание</div>
-            <p class="q-mt-xs q-mb-none">{{ task.description }}</p>
-          </div>
-        </q-card-section>
-      </q-card>
+      <UITaskCard
+        :task="task"
+        :status-colors="STATUS_COLORS"
+        :status-labels="STATUS_LABELS"
+        :work-type-labels="WORK_TYPE_LABELS"
+        :format-date="formatDate"
+        :get-user-name="getUserName"
+        :get-user-initials="getUserInitials"
+      />
     </template>
 
     <TaskForm v-model="showFormDialog" :task="task ?? null" @save="handleTaskSave" />
@@ -84,6 +56,8 @@ import { WORK_TYPE_LABELS } from '@/utils/constants';
 import TaskForm from '@/components/tasks/TaskForm.vue';
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue';
 import { useTaskDetail } from '@/composables/useTaskDetail';
+import UIButton from '@/components/common/UIButton.vue';
+import UITaskCard from '@/components/common/UITaskCard.vue';
 
 const {
   loading,
@@ -93,6 +67,7 @@ const {
   confirmDelete,
   formatDate,
   getUserInitials,
+  getUserName,
   showConfirmDialog,
   handleDeleteConfirm,
   handleTaskSave,

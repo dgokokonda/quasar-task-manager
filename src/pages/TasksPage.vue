@@ -5,7 +5,7 @@
         <div class="text-h5">Управление задачами</div>
       </div>
       <div class="col-auto">
-        <q-btn
+        <UIButton
           flat
           color="primary"
           icon="download"
@@ -14,7 +14,7 @@
           @click="exportCSV"
           :disable="!tasks.length"
         />
-        <q-btn
+        <UIButton
           flat
           color="primary"
           icon="download"
@@ -23,7 +23,7 @@
           @click="exportExcel"
           :disable="!tasks.length"
         />
-        <q-btn label="Новая задача" icon="add" color="primary" @click="showCreateDialog" />
+        <UIButton label="Новая задача" icon="add" color="primary" @click="showCreateDialog" />
       </div>
     </div>
 
@@ -39,14 +39,13 @@
     />
 
     <div class="row justify-end q-mb-md">
-      <q-btn-toggle
+      <UIButtonToggle
         v-model="viewMode"
         :options="[
           { label: 'Таблица', value: 'table' },
           { label: 'Канбан', value: 'kanban' },
           { label: 'График', value: 'chart' },
         ]"
-        toggle-color="primary"
         unelevated
         no-caps
       />
@@ -104,6 +103,8 @@ import TaskChart from '@/components/tasks/TaskChart.vue';
 import TaskForm from '@/components/tasks/TaskForm.vue';
 import TaskFilters from '@/components/tasks/TaskFilters.vue';
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue';
+import UIButton from '@/components/common/UIButton.vue';
+import UIButtonToggle from '@/components/common/UIButtonToggle.vue';
 
 const { loading, filters, tasks, updateFilters, resetFilters, updateTasks, updateTask } =
   useTasks();
