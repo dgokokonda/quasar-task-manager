@@ -15,7 +15,8 @@
       "startDate": "2024-03-01",
       "endDate": "2024-03-05",
       "description": "Сделать нарезку исходников",
-      "order": 2
+      "order": 2,
+      "priority": "medium"
     },
     {
       "id": 2,
@@ -31,7 +32,8 @@
       "startDate": "2026-01-15",
       "endDate": "2026-03-12",
       "description": "Привести цвета в единую гамму",
-      "order": 3
+      "order": 3,
+      "priority": "low"
     },
     {
       "id": "4",
@@ -48,7 +50,8 @@
       "startDate": "2024-06-12",
       "endDate": "2026-03-12",
       "description": "Записать сингл",
-      "order": 5
+      "order": 5,
+      "priority": "high"
     },
     {
       "id": 3,
@@ -66,7 +69,8 @@
       "startDate": "2026-05-11",
       "endDate": "2026-09-12",
       "description": "Создать дизайн-систему и базовую бизнес-логику",
-      "order": 1
+      "order": 1,
+      "priority": "medium"
     },
     {
       "name": "Написать канбан доску",
@@ -80,7 +84,8 @@
       "endDate": "2026-02-27",
       "description": "1",
       "id": 1772198923831,
-      "order": 4
+      "order": 4,
+      "priority": "high"
     },
     {
       "name": "1",
@@ -96,7 +101,8 @@
       "endDate": "2026-02-19",
       "description": "1",
       "id": 1772209754652,
-      "order": 1
+      "order": 1,
+      "priority": "low"
     }
   ],
   "projects": [
@@ -133,7 +139,21 @@
     "search": "",
     "workType": [],
     "assigneeId": [],
-    "sortBy": "order",
-    "sortOrder": "asc"
+    "dateFrom": "",
+    "dateTo": "",
+    "endDateFrom": "",
+    "endDateTo": "",
+    "hoursMin": 0,
+    "hoursMax": 0,
+    "sortBy": "priority",
+    "sortOrder": "desc"
+  },
+  "pageData": {
+    "page": 1,
+    "limit": 20,
+    "next": true,
+    "prev": false,
+    "total": 51,
+    "totalEntries": 1001
   }
 }

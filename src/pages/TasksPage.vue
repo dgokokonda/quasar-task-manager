@@ -5,7 +5,25 @@
         <div class="text-h5">Управление задачами</div>
       </div>
       <div class="col-auto">
-        <q-btn label="Новая задача" icon="add" color="primary" @click="showCreateDialog" />
+        <UIButton
+          flat
+          color="primary"
+          icon="download"
+          label="CSV"
+          title="Экспорт списка задач в CSV"
+          @click="exportCSV"
+          :disable="!tasks.length"
+        />
+        <UIButton
+          flat
+          color="primary"
+          icon="download"
+          label="Excel"
+          title="Экспорт списка задач в Excel"
+          @click="exportExcel"
+          :disable="!tasks.length"
+        />
+        <UIButton label="Новая задача" icon="add" color="primary" @click="showCreateDialog" />
       </div>
     </div>
 
@@ -21,13 +39,13 @@
     />
 
     <div class="row justify-end q-mb-md">
-      <q-btn-toggle
+      <UIButtonToggle
         v-model="viewMode"
         :options="[
           { label: 'Таблица', value: 'table' },
           { label: 'Канбан', value: 'kanban' },
+          { label: 'График', value: 'chart' },
         ]"
-        toggle-color="primary"
         unelevated
         no-caps
       />
@@ -50,7 +68,7 @@
       />
 
       <TaskKanban
-        v-else
+        v-else-if="viewMode === 'kanban'"
         :tasks="tasks"
         @status-change="handleStatusChange"
         @edit="openEditDialog"
@@ -58,6 +76,7 @@
         @update="updateTasks"
         @update-status="updateTask"
       />
+      <TaskChart :tasks="tasks" :loading="loading" v-else />
       <TaskPagination v-if="tasks.length > 0" key="1" />
     </template>
   </q-page>
@@ -80,9 +99,12 @@ import { useTaskPage } from '@/composables/useTaskPage';
 import TaskPagination from '@/components/tasks/TaskPagination.vue';
 import TaskTable from '@/components/tasks/TaskTable.vue';
 import TaskKanban from '@/components/tasks/TaskKanban.vue';
+import TaskChart from '@/components/tasks/TaskChart.vue';
 import TaskForm from '@/components/tasks/TaskForm.vue';
 import TaskFilters from '@/components/tasks/TaskFilters.vue';
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue';
+import UIButton from '@/components/common/UIButton.vue';
+import UIButtonToggle from '@/components/common/UIButtonToggle.vue';
 
 const { loading, filters, tasks, updateFilters, resetFilters, updateTasks, updateTask } =
   useTasks();
@@ -99,6 +121,8 @@ const {
   handleTaskSave,
   handleDeleteConfirm,
   handleStatusChange,
+  exportCSV,
+  exportExcel,
 } = useTaskPage();
 
 const localFilters = ref<TaskFiltersType>(filters.value);

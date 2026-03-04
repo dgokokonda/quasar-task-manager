@@ -8,104 +8,99 @@
       </q-card-section>
 
       <q-card-section>
-        <q-form @submit="onSubmit" class="q-gutter-md">
-          <q-input
+        <q-form @submit="onSubmit">
+          <UIInput
             v-model="form.name"
             label="Название задачи *"
-            :rules="[(val) => !!val || 'Обязательное поле']"
-            outlined
+            :rules="[(val: string) => !!val || 'Обязательное поле']"
           />
 
-          <q-select
+          <UISelect
             v-model="form.projectId"
             :options="projects"
             option-value="id"
             option-label="name"
             label="Проект *"
-            :rules="[(val) => !!val || 'Выберите проект']"
-            outlined
-            emit-value
-            map-options
+            :rules="[(val: number | null) => !!val || 'Выберите проект']"
           />
 
-          <q-select
+          <UISelect
             v-model="form.workType"
             :options="workTypeOptions"
             label="Тип работы *"
-            :rules="[(val) => !!val || 'Выберите тип работы']"
-            outlined
-            emit-value
-            map-options
+            option-value="id"
+            option-label="name"
+            :rules="[(val: WorkType | null) => !!val || 'Выберите тип работы']"
           />
 
-          <q-select
+          <UISelect
             v-model="form.assignees"
             :options="users"
             option-value="id"
             option-label="name"
             label="Исполнители"
             multiple
-            outlined
             use-chips
-            emit-value
-            map-options
+          />
+
+          <UISelect
+            v-model="form.priority"
+            :options="priorities"
+            option-value="id"
+            option-label="name"
+            label="Приоритет"
+            :rules="[(val: string | null) => !!val || 'Выберите приоритет']"
           />
 
           <div class="row q-col-gutter-md">
             <div class="col-6">
-              <q-input
+              <UIInput
                 v-model.number="form.plannedHours"
                 type="number"
                 label="Плановые часы *"
                 :rules="[
-                  (val) => val > 0 || 'Должно быть больше 0',
-                  (val) => Number.isInteger(val) || 'Должно быть целым числом',
+                  (val: number | string) => +val > 0 || 'Должно быть больше 0',
+                  (val: number | string) => Number.isInteger(val) || 'Должно быть целым числом',
                 ]"
-                outlined
               />
             </div>
             <div class="col-6">
-              <q-input
+              <UIInput
                 v-model="form.startDate"
                 type="date"
                 label="Дата начала *"
-                :rules="[(val) => !!val || 'Выберите дату']"
-                outlined
+                :rules="[(val: string) => !!val || 'Выберите дату']"
               />
             </div>
           </div>
 
           <div class="row q-col-gutter-md">
             <div class="col-6">
-              <q-select
+              <UISelect
                 v-model="form.status"
                 :options="statusOptions"
                 label="Статус *"
-                :rules="[(val) => !!val || 'Выберите статус']"
-                outlined
-                emit-value
-                map-options
+                :rules="[(val: TaskStatus | null) => !!val || 'Выберите статус']"
               />
             </div>
             <div class="col-6">
-              <q-input
+              <UIInput
                 v-model="form.endDate"
                 type="date"
                 label="Дата окончания *"
                 :rules="[
-                  (val) => !!val || 'Выберите дату',
-                  (val) =>
+                  (val: string) => !!val || 'Выберите дату',
+                  (val: string) =>
                     new Date(val) >= new Date(form.startDate) ||
                     'Дата окончания должна быть позже даты начала',
                 ]"
-                outlined
               />
             </div>
           </div>
 
-          <q-input v-model="form.description" label="Описание" type="textarea" outlined autogrow />
+          <UIInput v-model="form.description" label="Описание" type="textarea" autogrow />
 
-          <div class="row justify-end q-gutter-sm">
+          <div class="row justify-end q-gutter-sm q-pt-md">
             <q-btn label="Отмена" color="grey" v-close-popup />
             <q-btn
               :label="isEditing ? 'Сохранить' : 'Создать'"
@@ -124,6 +119,8 @@
 import { ref, computed, watch } from 'vue';
 import type { Task, WorkType, TaskStatus } from '@/types';
 import { useTaskFormOptions } from '@/composables/useTaskFormOptions';
+import UIInput from '../common/UIInput.vue';
+import UISelect from '../common/UISelect.vue';
 
 const props = defineProps<{
   modelValue: boolean;
@@ -135,7 +132,7 @@ const emit = defineEmits<{
   (e: 'save', task: Omit<Task, 'id'> | Partial<Task>): void;
 }>();
 
-const { projects, users, workTypeOptions, statusOptions } = useTaskFormOptions();
+const { projects, priorities, users, workTypeOptions, statusOptions } = useTaskFormOptions();
 
 const showDialog = computed({
   get: () => props.modelValue,
@@ -155,6 +152,7 @@ const form = ref({
   startDate: '',
   endDate: '',
   description: '',
+  priority: '',
 });
 
 const submitting = ref(false);
@@ -171,6 +169,7 @@ const resetForm = () => {
     startDate: '',
     endDate: '',
     description: '',
+    priority: '',
   };
 };
 
@@ -203,6 +202,7 @@ watch(
         startDate: task.startDate,
         endDate: task.endDate,
         description: task.description || '',
+        priority: task.priority || '',
       };
     } else {
       resetForm();

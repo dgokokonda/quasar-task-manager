@@ -32,11 +32,12 @@
             <td class="q-table__td">
               <q-icon name="drag_handle" class="drag-handle q-mr-sm" />
             </td>
+            <td class="q-table__td">{{ row.id }}</td>
             <td class="q-table__td" @click="toDetailPage(row.id)">{{ row.name }}</td>
             <td class="q-table__td">{{ getProjectName(row.projectId) }}</td>
             <td class="q-table__td">{{ WORK_TYPE_LABELS[row.workType as WorkType] }}</td>
             <td class="q-table__td">
-              <q-avatar
+              <UIAvatar
                 v-for="assigneeId in row.assignees"
                 :key="assigneeId"
                 size="24px"
@@ -46,26 +47,45 @@
                 :title="getUserName(assigneeId)"
               >
                 {{ getUserInitials(assigneeId) }}
-              </q-avatar>
+              </UIAvatar>
             </td>
             <td class="q-table__td text-center">
               {{ `${row.actualHours} / ${row.plannedHours}` }}
             </td>
             <td class="q-table__td text-center">
-              <q-badge :color="STATUS_COLORS[row.status as TaskStatus]">
+              <UIBadge :color="STATUS_COLORS[row.status as TaskStatus]">
                 {{ STATUS_LABELS[row.status as TaskStatus] }}
-              </q-badge>
+              </UIBadge>
+            </td>
+            <td class="q-table__td text-center">
+              <UIBadge :color="PRIORITY_COLORS[row.priority as TaskPriority]">
+                {{ PRIORITY_LABELS[row.priority as TaskPriority] }}
+              </UIBadge>
             </td>
             <td class="q-table__td text-center">
               {{ `${formatDate(row.startDate)} - ${formatDate(row.endDate)}` }}
             </td>
             <td class="q-table__td text-center">
-              <q-btn flat round dense icon="edit" size="sm" @click="emit('edit', row)">
-                Редактировать
-              </q-btn>
-              <q-btn flat round dense icon="delete" size="sm" @click="emit('delete', row)">
-                Удалить
-              </q-btn>
+              <UIButton
+                flat
+                round
+                dense
+                icon="edit"
+                size="sm"
+                @click="emit('edit', row)"
+                title="Редактировать"
+              >
+              </UIButton>
+              <UIButton
+                flat
+                round
+                dense
+                icon="delete"
+                size="sm"
+                @click="emit('delete', row)"
+                title="Удалить"
+              >
+              </UIButton>
             </td>
           </tr>
         </template>
@@ -83,9 +103,18 @@ import { useTaskTable } from '@/composables/useTaskTable';
 import type { OrderDeltaItem } from '@/services/taskService';
 import draggableComponent from 'vuedraggable';
 import { ref, watch } from 'vue';
-import type { Task, TaskStatus, WorkType } from '@/types';
-import { STATUS_COLORS, STATUS_LABELS, WORK_TYPE_LABELS } from '@/types';
+import type { Task, TaskStatus, WorkType, TaskPriority } from '@/types';
+import {
+  STATUS_COLORS,
+  STATUS_LABELS,
+  WORK_TYPE_LABELS,
+  PRIORITY_COLORS,
+  PRIORITY_LABELS,
+} from '@/types';
 import { useRouter } from 'vue-router';
+import UIAvatar from '@components/common/UIAvatar.vue';
+import UIBadge from '../common/UIBadge.vue';
+import UIButton from '../common/UIButton.vue';
 
 interface Props {
   tasks: Task[];

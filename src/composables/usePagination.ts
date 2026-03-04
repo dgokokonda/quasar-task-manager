@@ -55,7 +55,8 @@ export function usePagination() {
     await router.replace({ query });
   };
 
-  const onPageSizeChange = async (value: number) => {
+  const onPageSizeChange = async (value: string | number | (string | number)[] | null) => {
+    if (typeof value !== 'number') return;
     setPageLimit(value);
     setPage(1);
     await updateUrlParams();

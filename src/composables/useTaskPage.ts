@@ -1,5 +1,6 @@
 import { onMounted, ref, watch } from 'vue';
 import { useTasks } from '@/composables/useTasks';
+import { useExport } from '@/composables/useExport';
 import type { Task, TaskStatus } from '@/types';
 import { useRoute } from 'vue-router';
 
@@ -21,8 +22,9 @@ export function useTaskPage() {
     setPage,
     setPageLimit,
   } = useTasks();
+  const { exportToCSV, exportToExcel } = useExport();
 
-  const viewMode = ref<'table' | 'kanban'>('table');
+  const viewMode = ref<'table' | 'kanban' | 'chart'>('table');
   const showFormDialog = ref(false);
   const showConfirmDialog = ref(false);
   const selectedTask = ref<Task | null>(null);
@@ -93,6 +95,14 @@ export function useTaskPage() {
     localStorage.setItem('mode', newValue);
   });
 
+  const exportCSV = () => {
+    exportToCSV(tasks.value, 'Экспорт списка задач');
+  };
+
+  const exportExcel = () => {
+    exportToExcel(tasks.value, 'Экспорт списка задач');
+  };
+
   return {
     viewMode,
     showFormDialog,
@@ -110,5 +120,7 @@ export function useTaskPage() {
     handleStatusChange,
     resetFilters,
     updateFilters,
+    exportCSV,
+    exportExcel,
   };
 }
