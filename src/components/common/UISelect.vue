@@ -34,7 +34,7 @@ const props = withDefaults(
   defineProps<{
     modelValue: SelectValue;
     options: SelectOption[];
-    label: string;
+    label?: string;
     prependIcon?: string;
     multiple?: boolean;
     clearable?: boolean;

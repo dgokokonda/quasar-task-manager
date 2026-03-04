@@ -4,13 +4,11 @@
       <span class="text-body2 text-grey-7">
         Показано {{ paginationFrom }}–{{ paginationTo }} из {{ totalEntries }}
       </span>
-      <q-select
+      <UISelect
         :model-value="pageSize"
         :options="pageSizeOptions"
-        dense
-        outlined
-        emit-value
-        map-options
+        option-value="value"
+        option-label="label"
         options-dense
         style="min-width: 70px"
         @update:model-value="onPageSizeChange"
@@ -30,6 +28,7 @@
 
 <script setup lang="ts">
 import { usePagination } from '@/composables/usePagination';
+import UISelect from '../common/UISelect.vue';
 
 const {
   paginationFrom,

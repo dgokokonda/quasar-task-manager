@@ -6,7 +6,7 @@
           <div class="text-subtitle1 text-weight-medium">
             {{ statusLabel(status) }}
           </div>
-          <q-badge :color="statusColor(status)" :label="columnTasks(status).length" />
+          <UIBadge :color="statusColor(status)" :label="columnTasks(status).length" />
         </q-card-section>
         <q-separator />
         <q-scroll-area class="kanban-column-scroll" :style="{ height: columnHeight }" visible>
@@ -20,48 +20,14 @@
             @update:model-value="(v: Task[] | undefined) => setColumn(status, v ?? [])"
           >
             <template #item="{ element: task }">
-              <q-card
-                class="kanban-task q-mb-sm cursor-move"
-                flat
-                bordered
-                @click="emit('edit', task)"
-              >
-                <q-card-section class="q-py-sm">
-                  <div
-                    class="text-body2 text-weight-medium ellipsis-2 cursor-pointer"
-                    @click.stop="toDetailPage(task.id)"
-                  >
-                    {{ task.name }}
-                  </div>
-                  <div class="row items-center q-mt-xs">
-                    <q-avatar
-                      v-for="uid in task.assignees.slice(0, 3)"
-                      :key="uid"
-                      size="24px"
-                      class="q-mr-xs"
-                      color="primary"
-                      text-color="white"
-                      :title="getUserName(uid)"
-                    >
-                      {{ getUserInitials(uid) }}
-                    </q-avatar>
-                    <span class="text-caption text-grey">
-                      {{ task.actualHours }} / {{ task.plannedHours }} ч
-                    </span>
-                  </div>
-                </q-card-section>
-                <q-card-actions align="right" class="q-pt-none">
-                  <q-btn flat round dense icon="edit" size="sm" @click.stop="emit('edit', task)" />
-                  <q-btn
-                    flat
-                    round
-                    dense
-                    icon="delete"
-                    size="sm"
-                    @click.stop="emit('delete', task)"
-                  />
-                </q-card-actions>
-              </q-card>
+              <UIKanbanCard
+                :task="task"
+                :get-user-name="getUserName"
+                :get-user-initials="getUserInitials"
+                :to-detail-page="toDetailPage"
+                @edit="emit('edit', $event)"
+                @delete="emit('delete', $event)"
+              />
             </template>
           </draggable>
         </q-scroll-area>
@@ -74,6 +40,8 @@ import draggable from 'vuedraggable';
 import type { Task } from '@/types';
 import { useTaskKanban } from '@/composables/useTaskKanban';
 import type { OrderDeltaItem } from '@/services/taskService';
+import UIBadge from '../common/UIBadge.vue';
+import UIKanbanCard from '../common/UIKanbanCard.vue';
 
 const props = defineProps<{
   tasks: Task[];
@@ -133,7 +101,7 @@ const {
   overflow: hidden;
 }
 
-.kanban-list .q-card {
+.kanban-list :deep(.q-card) {
   cursor: grab;
 }
 </style>

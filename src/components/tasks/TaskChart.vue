@@ -4,31 +4,22 @@
       <div class="row items-center justify-between">
         <div class="text-h6">Распределение задач по дням</div>
         <div class="row q-gutter-sm">
-          <q-btn-toggle
+          <UIButtonToggle
             v-model="chartType"
             :options="[
               { label: 'По началу', value: 'start' },
               { label: 'По окончанию', value: 'end' },
               { label: 'Активные', value: 'active' },
             ]"
-            toggle-color="primary"
             dense
             outline
-            option-label="label"
-            option-value="value"
-            emit-value
-            map-options
           />
-          <q-select
+          <UISelect
             v-model="dateRange"
             :options="rangeOptions"
             label="Период"
-            dense
-            outlined
             option-label="label"
             option-value="value"
-            emit-value
-            map-options
             style="min-width: 120px"
           />
         </div>
@@ -50,6 +41,8 @@ import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import { debounce } from '@/utils/helpers';
 import { useTaskChart } from '@/composables/useTaskChart';
 import type { Task } from '@/types';
+import UISelect from '../common/UISelect.vue';
+import UIButtonToggle from '../common/UIButtonToggle.vue';
 
 const props = defineProps<{
   tasks: Task[];
