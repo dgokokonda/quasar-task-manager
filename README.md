@@ -1,4 +1,4 @@
-# PostProduction Planner | Тестовое задание для "Красный Квадрат"
+# PostProduction Planner | Планировщик задач (аналог Jira)
 
 ## Описание проекта
 
