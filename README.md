@@ -40,13 +40,13 @@ npm install
 # или
 yarn install
 
-# Запуск в режиме разработки (фронтенд)
-npm run dev
-# или
-yarn dev
+# Фронтенд + бэкенд одной командой (веб :9000, JSON Server :3000)
+npm run dev:all
 
-# Запуск в режиме разработки (бэкенд):
-npm run server # JSON Server на порту 3000
+# …или в двух терминалах:
+npm run dev      # Quasar dev server → http://localhost:9000
+
+npm run server   # сервер JSON Server (server/index.mjs) на порту 3000
 
 # Сборка для production
 npm run build
@@ -54,6 +54,31 @@ npm run preview
 ```
 
 После запуска клиентское приложение будет доступно по адресу: http://localhost:9000
+
+### Если запросы `/api/*` падают с 500
+
+Пока `npm run server` не запущен, Vite-прокси отвечает на `/api/*` статусом **500** с текстом `Error occurred while trying to proxy` — это не ошибка приложения, а следствие недоступного `:3000`. В dev по умолчанию стоит `VITE_MOCK_API=fallback` (`.env.development`): если бэкенд недоступен, запросы `/api/*` берёт на себя mock API (`src/mock/*`, данные из `public/mock/db.json`, изменения в `localStorage`), а в консоли браузера появляется `[mock-api] бэкенд на /api недоступен …`.
+
+Переключатели режима прямо из URL (без пересборки):
+
+| URL                                    | Режим                                                       |
+| -------------------------------------- | ----------------------------------------------------------- |
+| `http://localhost:9000/?mock=fallback` | как по умолчанию: реальный бэкенд, при его отсутствии — мок |
+| `http://localhost:9000/?mock=on`       | только mock API (сервер не нужен)                           |
+| `http://localhost:9000/?mock=off`      | только реальный бэкенд (нужен `npm run server`)             |
+| `http://localhost:9000/?resetDemo=1`   | сбросить состояние mock-демо к исходному сид-файлу          |
+
+## Демо в интернете (без сервера)
+
+Для демонстрации сервер не нужен: прод-сборка включает mock API, который отвечает на `/api/*` прямо в браузере (данные — сид + `localStorage`). Публикация — на GitHub Pages одним push'ем (workflow в `.github/workflows/deploy-demo.yml`).
+
+```bash
+npm run build:demo    # сборка демо (publicPath + mock API + 404.html для Pages)
+npm run preview:demo  # локальный просмотр dist/spa со SPA-fallback
+npm run test:mock     # смоук-тест mock API
+```
+
+Подробности, разбор альтернатив (Firebase/Netlify/Cloudflare/Render/Supabase) и чек-лист проверки — в [DEPLOY-DEMO.md](./DEPLOY-DEMO.md).
 
 ## Технологический стек
 

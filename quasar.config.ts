@@ -5,6 +5,12 @@ import { defineConfig } from '#q-app/wrappers';
 import * as path from 'path';
 import type { UserConfig } from 'vite';
 
+// Адрес бэкенда для dev-прокси (/api/*). Если сервер на другом порту — DEV_PROXY_TARGET.
+// Пока этот адрес недоступен, Vite отвечает на /api/* «500 Error occurred while trying
+// to proxy» — это не ошибка приложения, а следствие незапущенного npm run server
+// (в dev это подхватывает mock API: VITE_MOCK_API=fallback в .env.development).
+const devProxyTarget = process.env.DEV_PROXY_TARGET ?? 'http://localhost:3000';
+
 export default defineConfig((/* ctx */) => {
   return {
     supportTS: {
@@ -27,10 +33,12 @@ export default defineConfig((/* ctx */) => {
         vueShim: true,
       },
 
-      vueRouterMode: 'history', // available values: 'hash', 'history'
+      // 'history' требует сервера с SPA-fallback; для GitHub Pages deep-links закрывает
+      // 404.html (копия index.html, см. scripts/build-demo.mjs). Либо ROUTER_MODE=hash.
+      vueRouterMode: (process.env.ROUTER_MODE ?? 'history') as 'history' | 'hash',
 
-      // Публичный путь (для деплоя)
-      publicPath: '/',
+      // Публичный путь (для деплоя). GitHub Pages project site требует '/<repo>/'.
+      publicPath: process.env.PUBLIC_PATH ?? '/',
 
       // Настройки для production оптимизации
       extendViteConf(viteConf: UserConfig) {
@@ -65,7 +73,7 @@ export default defineConfig((/* ctx */) => {
         // Настройка прокси для JSON Server
         Object.assign(viteConf.server.proxy, {
           '/api': {
-            target: 'http://localhost:3000',
+            target: devProxyTarget,
             changeOrigin: true,
             /** @param {string} path */
             rewrite: (path: string): string => path.replace(/^\/api/, ''),
@@ -126,7 +134,8 @@ export default defineConfig((/* ctx */) => {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['pinia', 'echarts'],
+    // 'mock-api' первым: он подменяет fetch для /api/* до того, как сторы начнут грузить данные
+    boot: ['mock-api', 'pinia', 'echarts'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: ['app.scss'],

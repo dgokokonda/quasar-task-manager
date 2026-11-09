@@ -1,0 +1,12 @@
+# Деплой демо на Netlify (бесплатно, статика + mock API в браузере).
+# Публикуется dist/spa, собранный с publicPath '/' и VITE_MOCK_API=true.
+# Кнопка "Deploy to Netlify" или `netlify deploy --prod` после `npm run build:demo`.
+[build]
+  command = "DEMO_BASE=/ npm run build:demo"
+  publish = "dist/spa"
+
+# SPA-fallback: любой путь отдаёт index.html (роутер history-mode сам разберётся).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

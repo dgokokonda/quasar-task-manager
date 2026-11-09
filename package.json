@@ -10,8 +10,15 @@
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev",
+    "dev:all": "node scripts/dev-all.mjs",
     "build": "quasar build",
     "server": "node server/index.mjs",
+    "seed:demo": "node scripts/generate-demo-seed.mjs",
+    "build:demo": "node scripts/build-demo.mjs",
+    "preview:demo": "node scripts/serve-demo.mjs",
+    "lint:fix": "eslint -c ./eslint.config.js \"./src*/**/*.{ts,js,cjs,mjs,vue}\" --fix",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "test:mock": "node scripts/smoke-mock.mjs",
     "postinstall": "quasar prepare"
   },
   "dependencies": {

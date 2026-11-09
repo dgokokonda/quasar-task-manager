@@ -1,0 +1,70 @@
+# Деплой демо на GitHub Pages (статика + mock API в браузере, сервер не нужен).
+#
+# Что нужно включить один раз в репозитории:
+#   Settings -> Pages -> Build and deployment -> Source: "GitHub Actions"
+# После этого push в chart-feature-deploy (или кнопка Run workflow) публикует
+#   https://<логин>.github.io/<repo>/
+name: Deploy demo (GitHub Pages)
+
+on:
+  push:
+    branches: [chart-feature-deploy]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'server/db.json'
+      - 'scripts/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'quasar.config.ts'
+      - '.env.production'
+      - '.github/workflows/deploy-demo.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build demo (mock API, publicPath=/<repo>/)
+        run: npm run build:demo
+        env:
+          GH_PAGES_BASE: /${{ github.event.repository.name }}/
+          ROUTER_MODE: history
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/spa
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
