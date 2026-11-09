@@ -1,4 +1,4 @@
-# PostProduction Planner | Тестовое задание для "Красный Квадрат"
+# PostProduction Planner | Планировщик задач (аналог Jira)
 
 Демо проекта: [https://dgokokonda.github.io/quasar-task-manager/](https://dgokokonda.github.io/quasar-task-manager/)
 
