@@ -1,5 +1,7 @@
 # PostProduction Planner | Тестовое задание для "Красный Квадрат"
 
+Демо проекта: [https://dgokokonda.github.io/quasar-task-manager/](https://dgokokonda.github.io/quasar-task-manager/)
+
 ## Описание проекта
 
 PostProduction Planner — модуль системы планирования отдела постпродакшн, разработанный для управления задачами (tasks). Интерфейс позволяет менеджерам планировать работы, а исполнителям — отслеживать назначенные задачи.
